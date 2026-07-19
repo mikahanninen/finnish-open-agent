@@ -62,9 +62,9 @@ below are grouped by domain; **bold = implemented in v0.1**, the rest are the ro
 | **avoindata.fi** | National open-data catalogue (dataset discovery) | CKAN REST | none |
 | **Statistics Finland** | StatFin database (population, prices, economy…) | PxWeb REST | none |
 | Suomi.fi PTV | Public-service catalogue (services & channels) | REST JSON | none² |
-| Eduskunta | Parliament: MPs, votes, documents | REST / table API | none |
-| Finna | Libraries, museums, archives search | REST JSON | none |
-| Maanmittauslaitos (NLS) | Maps, geocoding, cadastral/property | WMTS/WFS/REST | free key |
+| **Eduskunta** | Parliament: MPs, seating/composition, votes, documents | REST / table API | none |
+| **Finna** | Libraries, museums, archives search | REST JSON | none |
+| **Maanmittauslaitos (NLS)** | Maps, **geocoding**, cadastral/property | WMTS/WFS/REST | free key |
 | Kela / THL | Benefits & health statistics (aggregate) | files / REST | varies |
 | DVV | Population/address data (mostly via avoindata) | files/REST | varies |
 
@@ -148,7 +148,11 @@ tests, docs, skill. ✅
 - Still open for a later pass: marine AIS, FMI warnings/radar, Fingrid production-mix helper,
   ENTSO-E, Suomi.fi PTV search.
 
-**Phase 3 — civic & culture.** Eduskunta (MPs/votes), Finna cultural search, NLS geocoding.
+**Phase 3 — civic & culture.** ✅ (21 tools total)
+- Eduskunta: `civic_search_mps`, `civic_parliament_composition` (current 200 MPs & seat split). ✅
+- Finna cultural search: `culture_search` across libraries/museums/archives. ✅
+- NLS geocoding: `places_geocode` (key-gated). ✅
+- Still open for a later pass: Eduskunta vote breakdowns, Finna record detail, NLS map tiles.
 
 **Phase 4 — quality & distribution.** Evaluation suite (per mcp-builder §4), rate-limit
 handling, publish to an MCP registry, optional Docker image for the HTTP mode.

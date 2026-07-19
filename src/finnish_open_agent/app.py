@@ -15,9 +15,12 @@ Finnish Open Agent exposes Finland's open data and public-service APIs as tools.
 
 Domains covered in this version:
   • Energy     — electricity spot (Nord Pool FI) prices, Fingrid grid data
-  • Weather    — Finnish Meteorological Institute (FMI) forecasts & observations
-  • Transport  — Fintraffic Digitraffic road & rail (VR) real-time data
-  • Registers  — PRH/YTJ business register, avoindata.fi catalogue, Statistics Finland
+  • Weather    — FMI forecasts, observations & air quality
+  • Transport  — Digitraffic road & rail, Digitransit journey planning
+  • Registers  — PRH/YTJ business register, avoindata.fi, Statistics Finland
+  • Civic      — Eduskunta (Parliament): members & seat composition
+  • Culture    — Finna: libraries, museums & archives search
+  • Places     — National Land Survey geocoding
 
 Most tools need no API key. Prices are in c/kWh incl. Finnish VAT unless noted.
 Times are ISO 8601; Finnish local time is UTC+2 (winter) / UTC+3 (summer).

@@ -2,9 +2,27 @@
 
 from __future__ import annotations
 
+from finnish_open_agent.tools.civic import _party_name, _rows_to_dicts
 from finnish_open_agent.tools.common import md_table
+from finnish_open_agent.tools.culture import _translated
 from finnish_open_agent.tools.registers import _current_name, _parse_jsonstat2
 from finnish_open_agent.tools.weather import _parse_simple_features
+
+
+def test_party_name_maps_known_and_passes_unknown():
+    assert _party_name("kok") == "National Coalition Party"
+    assert _party_name("VIHR") == "Green League"  # case-insensitive
+    assert _party_name("zzz") == "zzz"  # unknown code shown as-is
+
+
+def test_rows_to_dicts_zips_columns():
+    resp = {"columnNames": ["a", "b"], "rowData": [[1, 2], [3, 4]]}
+    assert _rows_to_dicts(resp) == [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+
+
+def test_translated_extracts_labels():
+    items = [{"translated": "Kirja", "value": "0/Book/"}, {"value": "CD"}]
+    assert _translated(items) == "Kirja, CD"
 
 SAMPLE_FMI = """<?xml version="1.0" encoding="UTF-8"?>
 <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"

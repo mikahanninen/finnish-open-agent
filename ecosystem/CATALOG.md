@@ -16,9 +16,9 @@ A copy-pasteable curl/jq playbook for the same Finnish open APIs, for use when n
 
 ### [Finnish Services MCP](https://github.com/mika-hanninen/finnish-open-agent/tree/main/src/finnish_open_agent) `MCP`
 
-MCP server exposing Finnish open data as 17 tools: electricity spot prices, FMI weather & air quality, Digitraffic road/rail + Digitransit journey planning, and the PRH/YTJ, avoindata.fi and Statistics Finland registers.
+MCP server exposing Finnish open data as 21 tools: electricity spot prices, FMI weather & air quality, Digitraffic road/rail + Digitransit journey planning, PRH/YTJ, avoindata.fi and Statistics Finland registers, Eduskunta (Parliament) data, Finna cultural search, and NLS geocoding.
 
-**Author:** Finnish Open Agent · _first-party_ · **License:** MIT · **Lang:** Python · **Tags:** digitraffic, fmi, prh, statistics-finland, spot-price
+**Author:** Finnish Open Agent · _first-party_ · **License:** MIT · **Lang:** Python · **Tags:** digitraffic, fmi, prh, statistics-finland, eduskunta, finna
 
 ## 🎓 Education
 

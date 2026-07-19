@@ -10,7 +10,7 @@ complementary things:
 
 Most services need **no API key**. Everything here is public, open data.
 
-## Domains (v0.2 — 17 tools)
+## Domains (v0.4 — 21 tools)
 
 | Domain | Source | Tools |
 | --- | --- | --- |
@@ -18,12 +18,15 @@ Most services need **no API key**. Everything here is public, open data.
 | 🌦️ Weather | Finnish Meteorological Institute (FMI), HSY | `weather_get_forecast`, `weather_get_observations`, `weather_get_air_quality` |
 | 🚆 Transport | Fintraffic Digitraffic, Digitransit | `transport_find_station`, `transport_get_station_trains`, `transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras` |
 | 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland | `registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`, `registers_statfin_browse`, `registers_statfin_get_table` |
+| 🏛️ Civic | Eduskunta (Parliament) | `civic_search_mps`, `civic_parliament_composition` |
+| 🎭 Culture | Finna (libraries/museums/archives) | `culture_search` |
+| 🗺️ Places | National Land Survey (MML) | `places_geocode` |
 
-Two tools need a free key (see Configuration): `transport_plan_route` (Digitransit) and
-`energy_fingrid_latest` (Fingrid). Everything else is key-less.
+Three tools need a free key (see Configuration): `transport_plan_route` (Digitransit),
+`energy_fingrid_latest` (Fingrid), and `places_geocode` (National Land Survey). Everything
+else is key-less.
 
-See [`PLAN.md`](./PLAN.md) for the full architecture and roadmap (Suomi.fi PTV, Eduskunta,
-Finna, NLS geocoding, and more).
+See [`PLAN.md`](./PLAN.md) for the full architecture and roadmap.
 
 ## Quick start
 
@@ -60,6 +63,8 @@ Then ask things like:
 - "When do the next trains leave Tampere, and plan me a route from Helsinki to Otaniemi."
 - "Look up the company Supercell and its Business ID."
 - "What was Finland's population at the end of 2025?" (Statistics Finland)
+- "What's the current seat split in the Finnish Parliament, and who are the Green MPs?"
+- "Find archive photos of Tove Jansson in Finnish museums." (Finna)
 
 ## Configuration
 
@@ -72,6 +77,7 @@ All configuration is via environment variables (see [`.env.example`](./.env.exam
 | `FOA_CACHE_TTL` | `120` | In-process cache TTL for slow-moving metadata (seconds; 0 disables) |
 | `FINGRID_API_KEY` | — | Free key from data.fingrid.fi (only needed for `energy_fingrid_latest`) |
 | `DIGITRANSIT_API_KEY` | — | Free key from portal-api.digitransit.fi (needed for `transport_plan_route`) |
+| `NLS_API_KEY` | — | Free National Land Survey key (needed for `places_geocode`) |
 | `FOA_TRANSPORT` | `stdio` | `stdio` (local) or `http` (remote streamable HTTP) |
 | `FOA_HOST` / `FOA_PORT` | `127.0.0.1` / `8000` | Bind address for HTTP transport |
 

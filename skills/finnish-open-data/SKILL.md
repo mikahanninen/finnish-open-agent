@@ -171,6 +171,37 @@ curl -s -X POST "$T" -H 'Content-Type: application/json' --data '{
 Tip: default any variable you do not care about to its last value (`.values[-1]`) to keep the
 query small — that is exactly what `registers_statfin_get_table` does automatically.
 
+## 🏛️ Parliament (Eduskunta)
+
+Current MPs and seat composition come from the `SeatingOfParliament` table (party codes:
+kok, ps, sd, kesk, vihr, vas, r, kd). `perPage` is capped at 100:
+
+```bash
+curl -s 'https://avoindata.eduskunta.fi/api/v1/tables/SeatingOfParliament/rows?perPage=100&page=0' \
+  | jq '.rowData | map({name:(.[3]+" "+.[2]|ltrimstr(" ")), party:.[4]})[:5]'
+# list all tables (votes = SaliDBAanestys, distributions = SaliDBAanestysJakauma):
+curl -s 'https://avoindata.eduskunta.fi/api/v1/tables/' | jq '.'
+```
+
+## 🎭 Culture (Finna)
+
+Search Finnish libraries, museums, and archives; each record page is
+`https://www.finna.fi/Record/<id>`:
+
+```bash
+curl -s 'https://api.finna.fi/v1/search?lookfor=Tove%20Jansson&limit=5&field%5B%5D=title&field%5B%5D=id&field%5B%5D=year&field%5B%5D=formats' \
+  | jq '.records[] | {title, year, id}'
+```
+
+## 🗺️ Geocoding (National Land Survey)
+
+Needs a free NLS API key (maanmittauslaitos.fi). Place/address → WGS84 coordinates:
+
+```bash
+curl -s 'https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias/search?text=Mannerheimintie%201&crs=EPSG:4326&api-key=YOUR_KEY' \
+  | jq '.features[0] | {label:.properties.label, coords:.geometry.coordinates}'
+```
+
 ## When to prefer the MCP server
 
 If `finnish_services_mcp` is connected, call its tools instead of curl — they validate inputs,
@@ -180,7 +211,8 @@ add the identifier header, cache metadata, normalise FMI's XML, and return clean
 `weather_get_air_quality`, `transport_find_station`, `transport_get_station_trains`,
 `transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras`,
 `registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`,
-`registers_statfin_browse`, `registers_statfin_get_table`.
+`registers_statfin_browse`, `registers_statfin_get_table`, `civic_search_mps`,
+`civic_parliament_composition`, `culture_search`, `places_geocode`.
 
 ## Attribution
 

@@ -23,13 +23,13 @@ entries:
     path: src/finnish_open_agent
     license: MIT
     language: Python
-    domains: [energy, weather, transport, registers]
-    tags: [digitraffic, fmi, prh, statistics-finland, spot-price]
+    domains: [energy, weather, transport, registers, civic, culture]
+    tags: [digitraffic, fmi, prh, statistics-finland, eduskunta, finna]
     description: >-
-      MCP server exposing Finnish open data as 17 tools: electricity spot
+      MCP server exposing Finnish open data as 21 tools: electricity spot
       prices, FMI weather & air quality, Digitraffic road/rail + Digitransit
-      journey planning, and the PRH/YTJ, avoindata.fi and Statistics Finland
-      registers.
+      journey planning, PRH/YTJ, avoindata.fi and Statistics Finland registers,
+      Eduskunta (Parliament) data, Finna cultural search, and NLS geocoding.
 
   - id: finnish-open-data-skill
     name: Finnish Open Data (CLI skill)

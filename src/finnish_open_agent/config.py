@@ -35,6 +35,8 @@ FINGRID_API_KEY: str | None = os.environ.get("FINGRID_API_KEY") or None
 # Optional Digitransit subscription key (higher rate limits) from
 # https://portal-api.digitransit.fi/. The API also works key-less for light use.
 DIGITRANSIT_API_KEY: str | None = os.environ.get("DIGITRANSIT_API_KEY") or None
+# Free National Land Survey key from https://www.maanmittauslaitos.fi/rajapinnat/api-avaimen-ohje
+NLS_API_KEY: str | None = os.environ.get("NLS_API_KEY") or None
 
 # ---------------------------------------------------------------------------
 # Base URLs (kept here so they are easy to audit / override in tests)
@@ -51,3 +53,8 @@ STATFIN_PXWEB_BASE = "https://pxdata.stat.fi/PxWeb/api/v1/en"
 # Digitransit (journey planning + geocoding). Both require a subscription key.
 DIGITRANSIT_ROUTING_BASE = "https://api.digitransit.fi/routing/v2/finland/gtfs/v1"
 DIGITRANSIT_GEOCODING_BASE = "https://api.digitransit.fi/geocoding/v1"
+# Civic & culture (key-less).
+EDUSKUNTA_BASE = "https://avoindata.eduskunta.fi/api/v1"
+FINNA_BASE = "https://api.finna.fi/v1"
+# National Land Survey (Maanmittauslaitos) geocoding — needs a free API key.
+NLS_GEOCODING_BASE = "https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias"

@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from finnish_open_agent.tools import energy, registers, transport, weather
+from finnish_open_agent.tools import civic, culture, energy, registers, transport, weather
+from finnish_open_agent.tools.culture import FinnaSearchInput
 from finnish_open_agent.tools.energy import CheapestHoursInput, SpotPricesInput
 from finnish_open_agent.tools.registers import CompanySearchInput, StatFinGetTableInput
 from finnish_open_agent.tools.transport import WeatherCamsInput
@@ -52,3 +53,13 @@ async def test_statfin_get_table_live():
         StatFinGetTableInput(table_path="vaerak/11ra.px")
     )
     assert "value" in out and "Error" not in out
+
+
+async def test_parliament_composition_live():
+    out = await civic.civic_parliament_composition()
+    assert "seats" in out.lower() and "Error" not in out
+
+
+async def test_finna_search_live():
+    out = await culture.culture_search(FinnaSearchInput(query="Sibelius", limit=2))
+    assert "Finna" in out and "Error" not in out
