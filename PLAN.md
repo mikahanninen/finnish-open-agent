@@ -103,9 +103,12 @@ surface (e.g. FMI's XML becomes tidy rows; PRH's name history collapses to the c
 
 ## 4. Skills (the CLI approach)
 
-`skills/finnish-open-data/SKILL.md` is a portable playbook: for each source it gives the
-exact endpoint, key parameters, and a runnable `curl` example, plus guidance on when to use
-the MCP tool instead. This satisfies two needs the MCP server alone doesn't:
+Skills live under `skills/` as **focused per-domain playbooks** (`finnish-energy`,
+`finnish-weather`, `finnish-transport`, `finnish-registers`, `finnish-civic`,
+`finnish-culture`, `finnish-places`) plus a `finnish-open-data` umbrella index. Splitting by
+domain gives each skill a tight, well-triggering description and only the recipes it needs.
+Each gives exact endpoints, key parameters, runnable `curl` examples, and the matching MCP
+tool names. This satisfies two needs the MCP server alone doesn't:
 
 1. **No-server usage** — an agent with only a shell can still get the data.
 2. **Transparency** — humans see precisely which public endpoint is being called.
@@ -153,6 +156,16 @@ tests, docs, skill. ✅
 - Finna cultural search: `culture_search` across libraries/museums/archives. ✅
 - NLS geocoding: `places_geocode` (key-gated). ✅
 - Still open for a later pass: Eduskunta vote breakdowns, Finna record detail, NLS map tiles.
+
+**Phase 3.5 — domain deepening & tooling.** ✅ (28 tools total)
+- Transport: marine AIS (`transport_get_vessels`), road-weather conditions
+  (`transport_get_road_weather`). ✅
+- Civic: recent votes (`civic_list_votes`) + per-party breakdowns (`civic_get_vote_breakdown`). ✅
+- Registers: Suomi.fi PTV service search & detail (`registers_search_services`,
+  `registers_get_service`). ✅
+- Weather: sea level & waves (`weather_get_sea`). ✅
+- AI-discoverability: `AGENTS.md`/`llms.txt` index + generated `docs/TOOLS.md`; per-domain
+  skills; GitHub Actions CI (lint, tests, doc-freshness `--check`). ✅
 
 **Phase 4 — quality & distribution.** Evaluation suite (per mcp-builder §4), rate-limit
 handling, publish to an MCP registry, optional Docker image for the HTTP mode.

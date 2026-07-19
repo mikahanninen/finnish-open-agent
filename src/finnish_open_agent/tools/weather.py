@@ -288,4 +288,78 @@ async def weather_get_air_quality(params: AirQualityInput) -> str:
         return handle_error(exc)
 
 
-__all__ = ["weather_get_forecast", "weather_get_observations", "weather_get_air_quality"]
+class SeaInput(BaseModel):
+    """Input for FMI marine observations (sea level or waves)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    place: str = Field(..., description="Coastal place/station, e.g. 'Helsinki', 'Kemi', 'Hanko'.", min_length=1)
+    kind: str = Field(default="sealevel", description="'sealevel' (mareograph) or 'wave' (buoys).")
+    hours: int = Field(default=6, ge=1, le=48, description="How many past hours to include.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="weather_get_sea", annotations={"title": "FMI sea level & waves", **_RO})
+async def weather_get_sea(params: SeaInput) -> str:
+    """Get recent sea-level (mareograph) or wave observations for a Finnish coastal location (FMI).
+
+    Sea-level parameters include WATLEV / WLEVN2K (water level, cm; theoretical mean & N2000
+    reference) and TW (water temperature °C). Wave data includes significant wave height.
+
+    Args:
+        params (SeaInput): place (str), kind ('sealevel'|'wave'), hours (int 1-48), response_format.
+
+    Returns:
+        str: Markdown table or JSON of {"time", <param>...} rows, oldest first.
+        On failure "Error: ...". Wave buoys operate mainly in open sea and warmer months.
+    """
+    query = (
+        "fmi::observations::mareograph::instant::simple"
+        if params.kind == "sealevel"
+        else "fmi::observations::wave::simple"
+    )
+    try:
+        # These queries return NaN-heavy or empty results with a `parameters` filter, so
+        # fetch all parameters and pivot client-side (same pattern as air quality).
+        text = await request_text(
+            config.FMI_WFS_BASE,
+            params={
+                "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                "storedquery_id": query, "place": params.place, "timestep": "60",
+            },
+        )
+        merged: dict[str, dict] = {}
+        for r in _parse_simple_features(text):
+            slot = merged.setdefault(r["time"], {"time": r["time"]})
+            for k, v in r.items():
+                if k == "time":
+                    continue
+                if v is not None or k not in slot:
+                    slot[k] = v
+        cols = sorted({k for row in merged.values() for k in row if k != "time"})
+        rows = [row for row in merged.values() if any(row.get(c) is not None for c in cols)]
+        result = sorted(rows, key=lambda r: r["time"])[-params.hours :]
+        if not result:
+            return (
+                f"No {params.kind} data for '{params.place}'. Use a coastal station "
+                "(e.g. Helsinki, Hanko, Kemi for sea level; open-sea buoys for waves)."
+            )
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"place": params.place, "kind": params.kind, "rows": result})
+        header = "| Time (UTC) | " + " | ".join(cols) + " |"
+        sep = "| --- | " + " | ".join(["---"] * len(cols)) + " |"
+        lines = [f"# FMI {params.kind} near {params.place}", "", header, sep]
+        for r in result:
+            vals = [("" if r.get(c) is None else str(r.get(c))) for c in cols]
+            lines.append(f"| {r['time']} | " + " | ".join(vals) + " |")
+        return "\n".join(lines)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+__all__ = [
+    "weather_get_forecast",
+    "weather_get_observations",
+    "weather_get_air_quality",
+    "weather_get_sea",
+]

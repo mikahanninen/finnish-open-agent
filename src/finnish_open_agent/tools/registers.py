@@ -314,10 +314,127 @@ async def registers_statfin_get_table(params: StatFinGetTableInput) -> str:
         return handle_error(exc)
 
 
+# Module-level cache of the full PTV service list (id, name). Services change slowly, so we
+# build this once (it spans ~29 pages) and reuse it for name searches.
+_PTV_SERVICES: list[dict] | None = None
+_PTV_TS: float = 0.0
+
+
+async def _ptv_services() -> list[dict]:
+    """Fetch and cache the full Suomi.fi PTV service list as [{id, name}] (paginated)."""
+    global _PTV_SERVICES, _PTV_TS
+    import time
+
+    if _PTV_SERVICES is not None and (time.monotonic() - _PTV_TS) < 3600:
+        return _PTV_SERVICES
+    out: list[dict] = []
+    page = 1
+    while page <= 40:  # safety cap; catalogue is ~29 pages
+        data = await request_json(f"{config.PTV_BASE}/Service", params={"page": page})
+        out.extend(data.get("itemList", []))
+        if page >= data.get("pageCount", page):
+            break
+        page += 1
+    _PTV_SERVICES = out
+    _PTV_TS = time.monotonic()
+    return out
+
+
+def _ptv_localized(items: list, prefer: str = "fi", type_filter: str | None = None) -> str:
+    """Pick a localized value (prefer Finnish) from a PTV name/description list."""
+    cands = [i for i in items or [] if (type_filter is None or i.get("type") == type_filter)]
+    for lang in (prefer, "en", "sv"):
+        for i in cands:
+            if i.get("language") == lang and i.get("value"):
+                return i["value"].strip()
+    return (cands[0].get("value", "").strip() if cands else "")
+
+
+class ServiceSearchInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    query: str = Field(..., description="Words to match in a public service name, e.g. 'varhaiskasvatus', 'passport'.", min_length=2)
+    limit: int = Field(default=15, ge=1, le=50)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="registers_search_services", annotations={"title": "Search Suomi.fi services", **_RO})
+async def registers_search_services(params: ServiceSearchInput) -> str:
+    """Search the Suomi.fi Finnish Service Catalogue (PTV) for public services by name.
+
+    Matches against the full national catalogue of public services (municipal & state). The
+    first call builds a catalogue index (~29 pages) and is cached for an hour.
+
+    Args:
+        params (ServiceSearchInput): query (str), limit (int 1-50), response_format.
+
+    Returns:
+        str: Markdown table (Service, Service ID) or JSON. Use a Service ID with
+        registers_get_service for full details. On failure "Error: ...".
+    """
+    try:
+        services = await _ptv_services()
+        ql = params.query.strip().lower()
+        matches = [s for s in services if ql in (s.get("name", "") or "").lower()][: params.limit]
+        if not matches:
+            return f"No Suomi.fi services found matching '{params.query}'."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"count": len(matches), "services": matches})
+        rows = [[s.get("name", ""), s.get("id", "")] for s in matches]
+        return (
+            f"# Suomi.fi services matching '{params.query}'\n\n"
+            + md_table(["Service", "Service ID"], rows)
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+class ServiceGetInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    service_id: str = Field(..., description="PTV service GUID from registers_search_services.", min_length=8)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="registers_get_service", annotations={"title": "Get Suomi.fi service details", **_RO})
+async def registers_get_service(params: ServiceGetInput) -> str:
+    """Get details of a Suomi.fi public service (PTV) by its GUID.
+
+    Args:
+        params (ServiceGetInput): service_id (GUID), response_format.
+
+    Returns:
+        str: Service name, summary/description, service classes and area coverage
+        (JSON returns the full PTV record). On failure "Error: ...".
+    """
+    try:
+        d = await request_json(f"{config.PTV_BASE}/Service/{params.service_id}")
+        if params.response_format == ResponseFormat.JSON:
+            return as_json(d)
+        name = _ptv_localized(d.get("serviceNames", []))
+        summary = _ptv_localized(d.get("serviceDescriptions", []), type_filter="Summary") or \
+            _ptv_localized(d.get("serviceDescriptions", []), type_filter="Description")
+        classes = []
+        for c in d.get("serviceClasses", []):
+            cn = _ptv_localized(c.get("name", [])) if isinstance(c.get("name"), list) else c.get("name", "")
+            if cn:
+                classes.append(cn)
+        area = d.get("areaType", "")
+        return (
+            f"# {name or '(unnamed service)'}\n\n"
+            f"{summary}\n\n"
+            f"- **Service classes:** {', '.join(classes) or 'n/a'}\n"
+            f"- **Area:** {area}\n"
+            f"- **Service ID:** {d.get('id', params.service_id)}\n"
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "registers_search_companies",
     "registers_get_company",
     "registers_search_open_datasets",
     "registers_statfin_browse",
     "registers_statfin_get_table",
+    "registers_search_services",
+    "registers_get_service",
 ]

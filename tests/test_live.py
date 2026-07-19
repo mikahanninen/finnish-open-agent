@@ -63,3 +63,33 @@ async def test_parliament_composition_live():
 async def test_finna_search_live():
     out = await culture.culture_search(FinnaSearchInput(query="Sibelius", limit=2))
     assert "Finna" in out and "Error" not in out
+
+
+async def test_vessels_live():
+    from finnish_open_agent.tools.transport import VesselsInput
+
+    out = await transport.transport_get_vessels(
+        VesselsInput(min_lat=59.7, max_lat=60.4, min_lon=24.0, max_lon=26.0, limit=3)
+    )
+    assert ("MMSI" in out or "vessel" in out.lower()) and "Error" not in out
+
+
+async def test_list_votes_live():
+    from finnish_open_agent.tools.civic import VotesListInput
+
+    out = await civic.civic_list_votes(VotesListInput(year=2025, limit=3))
+    assert "Vote ID" in out and "Error" not in out
+
+
+async def test_vote_breakdown_live():
+    from finnish_open_agent.tools.civic import VoteBreakdownInput
+
+    out = await civic.civic_get_vote_breakdown(VoteBreakdownInput(vote_id=55554))
+    assert "Yes" in out and "Error" not in out
+
+
+async def test_sea_level_live():
+    from finnish_open_agent.tools.weather import SeaInput
+
+    out = await weather.weather_get_sea(SeaInput(place="Helsinki", kind="sealevel", hours=2))
+    assert "sealevel" in out.lower() and "Error" not in out

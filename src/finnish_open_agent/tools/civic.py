@@ -163,4 +163,113 @@ async def civic_parliament_composition() -> str:
         return handle_error(exc)
 
 
-__all__ = ["civic_search_mps", "civic_parliament_composition"]
+def _int(v) -> int:
+    try:
+        return int(str(v).strip())
+    except (TypeError, ValueError):
+        return 0
+
+
+class VotesListInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    year: Optional[int] = Field(
+        default=None, description="Parliament year (defaults to the current year), e.g. 2025.", ge=1996, le=2100
+    )
+    limit: int = Field(default=10, ge=1, le=50)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="civic_list_votes", annotations={"title": "Recent parliament votes", **_RO})
+async def civic_list_votes(params: VotesListInput) -> str:
+    """List recent plenary votes in the Finnish Parliament (Eduskunta) for a given year.
+
+    Args:
+        params (VotesListInput): year (int, default current), limit (int 1-50), response_format.
+
+    Returns:
+        str: Markdown table (Vote ID, Date, Title) newest first, or JSON. Use a Vote ID with
+        civic_get_vote_breakdown. On failure "Error: ...".
+    """
+    from datetime import datetime, timezone
+
+    try:
+        year = params.year or datetime.now(timezone.utc).year
+        data = await request_json(
+            f"{config.EDUSKUNTA_BASE}/tables/SaliDBAanestys/rows",
+            params={"columnName": "IstuntoVPVuosi", "columnValue": year, "perPage": 100, "page": 0},
+        )
+        rows = _rows_to_dicts(data)
+        for r in rows:
+            r["_when"] = r.get("AanestysAlkuaika") or r.get("IstuntoPvm") or ""
+        rows.sort(key=lambda r: r["_when"], reverse=True)
+        rows = rows[: params.limit]
+        if not rows:
+            return f"No votes found for {year} (try a different year)."
+        out = [
+            {
+                "voteId": r.get("AanestysId"),
+                "date": (r.get("IstuntoPvm") or "")[:10],
+                "title": (r.get("AanestysOtsikko") or r.get("PaaKohtaOtsikko") or "").strip(),
+            }
+            for r in rows
+        ]
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"year": year, "votes": out})
+        trows = [[o["voteId"], o["date"], o["title"][:80]] for o in out]
+        return f"# Recent parliament votes ({year})\n\n" + md_table(["Vote ID", "Date", "Title"], trows)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+class VoteBreakdownInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    vote_id: int = Field(..., description="Vote id (AanestysId) from civic_list_votes.", ge=1)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="civic_get_vote_breakdown", annotations={"title": "Parliament vote breakdown", **_RO})
+async def civic_get_vote_breakdown(params: VoteBreakdownInput) -> str:
+    """Get the yes/no/abstain/absent breakdown of a Finnish Parliament vote, by party.
+
+    Args:
+        params (VoteBreakdownInput): vote_id (int), response_format.
+
+    Returns:
+        str: Overall result (Yes vs No) plus a per-party table (Yes/No/Abstain/Absent).
+        On failure "Error: ...".
+    """
+    try:
+        data = await request_json(
+            f"{config.EDUSKUNTA_BASE}/tables/SaliDBAanestysJakauma/rows",
+            params={"columnName": "AanestysId", "columnValue": params.vote_id, "perPage": 100, "page": 0},
+        )
+        rows = [r for r in _rows_to_dicts(data) if (r.get("Tyyppi") or "").strip() == "eduskuntaryhma"]
+        if not rows:
+            return f"No breakdown found for vote {params.vote_id}. Check the vote id."
+        parties = []
+        tot = {"Jaa": 0, "Ei": 0, "Tyhjia": 0, "Poissa": 0}
+        for r in rows:
+            vals = {k: _int(r.get(k)) for k in tot}
+            for k in tot:
+                tot[k] += vals[k]
+            parties.append({"party": (r.get("Ryhma") or "").strip(), **vals})
+        parties.sort(key=lambda p: p["Jaa"] + p["Ei"], reverse=True)
+        result = "PASSED (Yes)" if tot["Jaa"] > tot["Ei"] else ("REJECTED (No)" if tot["Ei"] > tot["Jaa"] else "TIE")
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"voteId": params.vote_id, "totals": tot, "result": result, "byParty": parties})
+        prows = [[p["party"], p["Jaa"], p["Ei"], p["Tyhjia"], p["Poissa"]] for p in parties]
+        return (
+            f"# Vote {params.vote_id} — {result}\n\n"
+            f"Totals: **Yes {tot['Jaa']} · No {tot['Ei']} · Abstain {tot['Tyhjia']} · Absent {tot['Poissa']}**\n\n"
+            + md_table(["Party (group)", "Yes", "No", "Abstain", "Absent"], prows)
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+__all__ = [
+    "civic_search_mps",
+    "civic_parliament_composition",
+    "civic_list_votes",
+    "civic_get_vote_breakdown",
+]

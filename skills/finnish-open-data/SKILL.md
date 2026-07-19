@@ -1,221 +1,28 @@
 ---
 name: finnish-open-data
 description: >-
-  Access Finland's open data and public-service APIs from the command line (curl/jq) —
-  electricity spot prices, FMI weather forecasts & observations, Fintraffic Digitraffic
-  road/rail data, the PRH/YTJ business register, the avoindata.fi catalogue, and Statistics
-  Finland. Use whenever the user asks about Finnish electricity prices, Finnish weather,
-  Finnish trains or road traffic, a Finnish company / Business ID (Y-tunnus), Finnish open
-  datasets, or Finnish statistics — and no dedicated MCP tool is available.
+  Umbrella entry point for Finland's open data and public-service APIs from the command line.
+  Use for general "Finnish open data / open API" questions; for a specific area prefer the
+  focused skills: finnish-energy, finnish-weather, finnish-transport, finnish-registers,
+  finnish-civic, finnish-culture, finnish-places.
 ---
 
-# Finnish Open Data — CLI playbook
+# Finnish open data — index
 
-Reach Finland's public, open APIs with plain `curl`. Almost none need an API key. Prefer the
-`finnish_services_mcp` MCP tools when they are connected; use these recipes when they are not,
-or when the user wants a copy-pasteable command.
+This repository ships **focused per-domain skills**; pick the one matching the task (each has
+ready-to-run `curl` recipes and the matching MCP tool names):
 
-**Etiquette:** send an identifying `Digitraffic-User` header to Fintraffic endpoints. Prices
-are c/kWh incl. Finnish VAT. Times are ISO 8601, mostly UTC (Finland = UTC+2/+3).
-Pipe through `jq` for readable output.
+| Skill | Covers |
+| --- | --- |
+| `finnish-energy` | Electricity spot prices, cheapest hours, Fingrid |
+| `finnish-weather` | FMI forecasts, observations, air quality, sea level/waves |
+| `finnish-transport` | Trains, traffic, cameras, road weather, ships (AIS), routing |
+| `finnish-registers` | PRH/YTJ companies, avoindata.fi, Statistics Finland, Suomi.fi services |
+| `finnish-civic` | Eduskunta (Parliament): MPs, seats, votes |
+| `finnish-culture` | Finna: libraries, museums, archives |
+| `finnish-places` | National Land Survey geocoding |
 
-## ⚡ Electricity spot price
-
-Hourly day-ahead price for today (+tomorrow after ~14:00 EET), c/kWh incl. VAT:
-
-```bash
-curl -s https://api.porssisahko.net/v1/latest-prices.json | jq '.prices[:5]'
-```
-
-Current-hour price and its cheapness rank:
-
-```bash
-curl -s https://api.spot-hinta.fi/JustNow | jq '{price_c_per_kwh: (.PriceWithTax*100), rank: .Rank}'
-```
-
-Cheapest N hours of the day (planning appliances):
-
-```bash
-curl -s 'https://api.spot-hinta.fi/TodayAndDayForward' | jq 'sort_by(.PriceWithTax)[:5]'
-```
-
-## 🌦️ Weather (Finnish Meteorological Institute)
-
-FMI serves XML via WFS "stored queries". Forecast for a place (temperature, wind, humidity):
-
-```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=fmi::forecast::harmonie::surface::point::simple\
-&place=Helsinki&parameters=Temperature,WindSpeedMS,Humidity&timestep=60'
-```
-
-Recent station observations (t2m=temp °C, ws_10min=wind m/s, rh=humidity %, r_1h=rain mm):
-
-```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=fmi::observations::weather::simple&place=Tampere&parameters=t2m,ws_10min,rh'
-```
-
-Each `<BsWfs:BsWfsElement>` holds a `Time`, `ParameterName`, and `ParameterValue`; pivot by
-time to build rows. List all stored queries with
-`...&request=describeStoredQueries`.
-
-Air quality (note: do NOT send `&parameters=` to the air-quality queries — it returns zero
-results; fetch all and filter client-side). Use `urban::` for the Helsinki/HSY region and
-`fmi::` elsewhere:
-
-```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=urban::observations::airquality::hourly::simple&place=Helsinki'   # Helsinki region
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=fmi::observations::airquality::hourly::simple&place=Tampere'       # elsewhere
-```
-
-`AQINDEX_PT1H_avg` is the air-quality index (1 good … 5+ very poor); PM2.5/PM10/NO2/O3 in µg/m³.
-
-## 🚆 Transport (Fintraffic Digitraffic)
-
-Always send `-H 'Digitraffic-User: your-name/your-app'`.
-
-Find a railway station short code:
-
-```bash
-curl -s -H 'Digitraffic-User: mika/foa' \
-  https://rata.digitraffic.fi/api/v1/metadata/stations \
-  | jq '.[] | select(.stationName|test("Tampere")) | {stationName, stationShortCode}'
-```
-
-Live departing trains from a station (use the short code, e.g. TPE):
-
-```bash
-curl -s -H 'Digitraffic-User: mika/foa' \
-  'https://rata.digitraffic.fi/api/v1/live-trains/station/TPE?departing_trains=8&include_nonstopping=false' \
-  | jq '.[] | {train: (.trainType+(.trainNumber|tostring)), cancelled}'
-```
-
-Current road traffic disruption messages:
-
-```bash
-curl -s -H 'Digitraffic-User: mika/foa' \
-  'https://tie.digitraffic.fi/api/traffic-message/v1/messages?inactiveHours=0&situationType=TRAFFIC_ANNOUNCEMENT' \
-  | jq '.features[].properties.announcements[0].title'
-```
-
-Road weather cameras (image = `https://weathercam.digitraffic.fi/<presetId>.jpg`):
-
-```bash
-curl -s -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weathercam/v1/stations \
-  | jq '.features[] | select(.properties.name|test("Kirkkonummi")) | {id:.properties.id, name:.properties.name}'
-```
-
-Journey planning (Digitransit) needs a free key from portal-api.digitransit.fi. Geocode, then
-POST a GraphQL `plan` query:
-
-```bash
-KEY=your-digitransit-key
-curl -s "https://api.digitransit.fi/geocoding/v1/search?text=Otaniemi&size=1" \
-  -H "digitransit-subscription-key: $KEY" | jq '.features[0].geometry.coordinates'
-curl -s -X POST https://api.digitransit.fi/routing/v2/finland/gtfs/v1 \
-  -H "digitransit-subscription-key: $KEY" -H 'Content-Type: application/json' \
-  --data '{"query":"{plan(from:{lat:60.17,lon:24.94},to:{lat:60.18,lon:24.83},numItineraries:3){itineraries{duration legs{mode route{shortName}}}}}"}'
-```
-
-## 🏢 Business register (PRH / YTJ)
-
-Search companies by name (Business ID = Y-tunnus, format `1234567-8`):
-
-```bash
-curl -s 'https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Supercell' \
-  | jq '.companies[] | {businessId: .businessId.value, name: .names[0].name}'
-```
-
-Full details for one company:
-
-```bash
-curl -s 'https://avoindata.prh.fi/opendata-ytj-api/v3/companies?businessId=2336509-6' | jq '.companies[0]'
-```
-
-## 📚 National open-data catalogue (avoindata.fi / CKAN)
-
-Discover which datasets/APIs exist for a topic:
-
-```bash
-curl -s 'https://www.avoindata.fi/data/api/3/action/package_search?q=air%20quality&rows=5' \
-  | jq '.result.results[] | {title, publisher: .organization.title, name}'
-```
-
-Dataset page: `https://www.avoindata.fi/data/en_GB/dataset/<name>`.
-
-## 📊 Statistics Finland (PxWeb / StatFin)
-
-Browse the database tree (empty path = top level; `l`=level, `t`=table):
-
-```bash
-curl -s 'https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/' | jq '.[] | {id, text, type}'
-```
-
-Get a table's variables (codes are dynamic per table, e.g. `alue_23_20260101`), then POST a
-selection to fetch values as json-stat2:
-
-```bash
-T='https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11ra.px'
-curl -s "$T" | jq '.variables[] | {code, text, last:.values[-1]}'
-# whole-country population at end of 2025:
-curl -s -X POST "$T" -H 'Content-Type: application/json' --data '{
-  "query":[{"code":"alue_23_20260101","selection":{"filter":"item","values":["SSS"]}},
-           {"code":"contentscode","selection":{"filter":"item","values":["vaerak-vaesto"]}},
-           {"code":"timeperiod_y","selection":{"filter":"item","values":["2025"]}}],
-  "response":{"format":"json-stat2"}}' | jq '.value'
-```
-
-Tip: default any variable you do not care about to its last value (`.values[-1]`) to keep the
-query small — that is exactly what `registers_statfin_get_table` does automatically.
-
-## 🏛️ Parliament (Eduskunta)
-
-Current MPs and seat composition come from the `SeatingOfParliament` table (party codes:
-kok, ps, sd, kesk, vihr, vas, r, kd). `perPage` is capped at 100:
-
-```bash
-curl -s 'https://avoindata.eduskunta.fi/api/v1/tables/SeatingOfParliament/rows?perPage=100&page=0' \
-  | jq '.rowData | map({name:(.[3]+" "+.[2]|ltrimstr(" ")), party:.[4]})[:5]'
-# list all tables (votes = SaliDBAanestys, distributions = SaliDBAanestysJakauma):
-curl -s 'https://avoindata.eduskunta.fi/api/v1/tables/' | jq '.'
-```
-
-## 🎭 Culture (Finna)
-
-Search Finnish libraries, museums, and archives; each record page is
-`https://www.finna.fi/Record/<id>`:
-
-```bash
-curl -s 'https://api.finna.fi/v1/search?lookfor=Tove%20Jansson&limit=5&field%5B%5D=title&field%5B%5D=id&field%5B%5D=year&field%5B%5D=formats' \
-  | jq '.records[] | {title, year, id}'
-```
-
-## 🗺️ Geocoding (National Land Survey)
-
-Needs a free NLS API key (maanmittauslaitos.fi). Place/address → WGS84 coordinates:
-
-```bash
-curl -s 'https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias/search?text=Mannerheimintie%201&crs=EPSG:4326&api-key=YOUR_KEY' \
-  | jq '.features[0] | {label:.properties.label, coords:.geometry.coordinates}'
-```
-
-## When to prefer the MCP server
-
-If `finnish_services_mcp` is connected, call its tools instead of curl — they validate inputs,
-add the identifier header, cache metadata, normalise FMI's XML, and return clean Markdown/JSON:
-`energy_get_spot_prices`, `energy_get_price_now`, `energy_cheapest_hours`,
-`energy_fingrid_latest`, `weather_get_forecast`, `weather_get_observations`,
-`weather_get_air_quality`, `transport_find_station`, `transport_get_station_trains`,
-`transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras`,
-`registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`,
-`registers_statfin_browse`, `registers_statfin_get_table`, `civic_search_mps`,
-`civic_parliament_composition`, `culture_search`, `places_geocode`.
-
-## Attribution
-
-Open data still has licences (mostly CC BY 4.0). Credit the originators — Fintraffic /
-Digitraffic, Finnish Meteorological Institute, PRH, Statistics Finland, avoindata.fi / DVV,
-Fingrid — in anything you publish.
+General etiquette: identify yourself to Fintraffic with a `Digitraffic-User` header; prices
+are c/kWh incl. Finnish VAT; times are ISO 8601 (Finland = UTC+2/+3). When an MCP server
+(`finnish_services_mcp`) is connected, prefer its tools — see `docs/TOOLS.md`. Open data still
+has licenses (mostly CC BY 4.0): attribute the originators.

@@ -10,23 +10,26 @@ complementary things:
 
 Most services need **no API key**. Everything here is public, open data.
 
-## Domains (v0.4 — 21 tools)
+## Domains (v0.5 — 28 tools)
+
+Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
 | Domain | Source | Tools |
 | --- | --- | --- |
-| ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | `energy_get_spot_prices`, `energy_get_price_now`, `energy_cheapest_hours`, `energy_fingrid_latest` |
-| 🌦️ Weather | Finnish Meteorological Institute (FMI), HSY | `weather_get_forecast`, `weather_get_observations`, `weather_get_air_quality` |
-| 🚆 Transport | Fintraffic Digitraffic, Digitransit | `transport_find_station`, `transport_get_station_trains`, `transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras` |
-| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland | `registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`, `registers_statfin_browse`, `registers_statfin_get_table` |
-| 🏛️ Civic | Eduskunta (Parliament) | `civic_search_mps`, `civic_parliament_composition` |
-| 🎭 Culture | Finna (libraries/museums/archives) | `culture_search` |
-| 🗺️ Places | National Land Survey (MML) | `places_geocode` |
+| ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | spot prices, price now, cheapest hours, Fingrid data |
+| 🌦️ Weather | FMI, HSY | forecast, observations, air quality, sea level & waves |
+| 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, ships (AIS), journey routing |
+| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search, StatFin browse & data, public-service search & detail |
+| 🏛️ Civic | Eduskunta (Parliament) | MP search, seat composition, recent votes, vote breakdowns |
+| 🎭 Culture | Finna | cultural-heritage search |
+| 🗺️ Places | National Land Survey (MML) | geocoding |
 
 Three tools need a free key (see Configuration): `transport_plan_route` (Digitransit),
 `energy_fingrid_latest` (Fingrid), and `places_geocode` (National Land Survey). Everything
 else is key-less.
 
-See [`PLAN.md`](./PLAN.md) for the full architecture and roadmap.
+See [`PLAN.md`](./PLAN.md) for architecture, [`AGENTS.md`](./AGENTS.md) for a code map, and
+[`skills/`](./skills) for per-domain CLI playbooks.
 
 ## Quick start
 
@@ -106,12 +109,20 @@ Prefer not to run a server? The [`skills/finnish-open-data`](./skills/finnish-op
 skill documents ready-to-run `curl` recipes for every source above. Drop the folder into
 your agent's skills directory (or `~/.claude/skills/`).
 
-## Testing
+## Testing & CI
 
 ```bash
-uv run pytest              # offline unit tests (XML parsing, formatting)
-uv run pytest -m live      # optional live smoke tests against real APIs
+uv run python -m pytest -m "not live"   # offline unit tests (parsing, docs freshness)
+uv run python -m pytest -m live         # optional live smoke tests against real APIs
+uv run ruff check src tests scripts
+uv run python scripts/render_tools.py    # regenerate docs/TOOLS.md
+uv run python scripts/render_catalog.py  # regenerate ecosystem/CATALOG.md
 ```
+
+GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) runs lint, offline
+tests, and a **doc-freshness check** — a PR that changes tools or the registry without
+regenerating `docs/TOOLS.md` / `ecosystem/CATALOG.md` fails CI, so the generated markdown can
+never drift out of sync.
 
 ## Data sources & licensing
 

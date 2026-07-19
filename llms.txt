@@ -1,0 +1,19 @@
+# Finnish Open Agent
+
+> MCP server + CLI skills exposing Finland's open data and public-service APIs (energy,
+> weather, transport, registers, civic, culture, places) as agent tools, plus a curated
+> registry of other Finnish skills/MCPs. Python, uv-managed, mostly key-less.
+
+## Docs
+- [Tool reference (generated)](./docs/TOOLS.md): every MCP tool and its parameters
+- [README](./README.md): overview, install, configuration
+- [Architecture & plan](./PLAN.md): design and the Finnish open-data landscape
+- [Agent orientation](./AGENTS.md): code map and conventions
+
+## Skills (CLI/curl)
+- [Skills index](./skills/README.md): per-domain curl playbooks
+
+## Ecosystem
+- [Community catalog (generated)](./ecosystem/CATALOG.md): other Finnish skills/MCPs
+- [Registry source](./ecosystem/registry.yaml): add your project here
+- [Contributing](./CONTRIBUTING.md): how to add a tool or list a project

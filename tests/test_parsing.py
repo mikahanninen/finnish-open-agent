@@ -2,11 +2,27 @@
 
 from __future__ import annotations
 
-from finnish_open_agent.tools.civic import _party_name, _rows_to_dicts
+from finnish_open_agent.tools.civic import _int, _party_name, _rows_to_dicts
 from finnish_open_agent.tools.common import md_table
 from finnish_open_agent.tools.culture import _translated
-from finnish_open_agent.tools.registers import _current_name, _parse_jsonstat2
+from finnish_open_agent.tools.registers import _current_name, _parse_jsonstat2, _ptv_localized
 from finnish_open_agent.tools.weather import _parse_simple_features
+
+
+def test_int_strips_and_parses():
+    assert _int("54        ") == 54
+    assert _int(None) == 0
+    assert _int("x") == 0
+
+
+def test_ptv_localized_prefers_finnish_and_type():
+    items = [
+        {"language": "en", "value": "Early childhood education", "type": "Summary"},
+        {"language": "fi", "value": "Varhaiskasvatus", "type": "Summary"},
+        {"language": "fi", "value": "Pitkä kuvaus", "type": "Description"},
+    ]
+    assert _ptv_localized(items, type_filter="Summary") == "Varhaiskasvatus"
+    assert _ptv_localized(items, type_filter="Description") == "Pitkä kuvaus"
 
 
 def test_party_name_maps_known_and_passes_unknown():

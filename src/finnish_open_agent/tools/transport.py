@@ -367,10 +367,173 @@ async def transport_find_weather_cameras(params: WeatherCamsInput) -> str:
         return handle_error(exc)
 
 
+async def _vessel_names() -> dict[int, dict]:
+    """Fetch (and cache) AIS vessel metadata, mapping MMSI -> {name, shipType}."""
+    data = await request_json(f"{config.DIGITRAFFIC_MARINE_BASE}/ais/v1/vessels")
+    out: dict[int, dict] = {}
+    items = data if isinstance(data, list) else data.get("features", [])
+    for v in items:
+        props = v.get("properties", v)
+        mmsi = props.get("mmsi") or v.get("mmsi")
+        if mmsi is not None:
+            out[int(mmsi)] = {"name": (props.get("name") or "").strip(), "shipType": props.get("shipType")}
+    return out
+
+
+class VesselsInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    min_lat: Optional[float] = Field(default=None, description="Bounding box south latitude.")
+    max_lat: Optional[float] = Field(default=None, description="Bounding box north latitude.")
+    min_lon: Optional[float] = Field(default=None, description="Bounding box west longitude.")
+    max_lon: Optional[float] = Field(default=None, description="Bounding box east longitude.")
+    moving_only: bool = Field(default=True, description="Only include vessels currently moving (speed > 0.5 kn).")
+    limit: int = Field(default=15, ge=1, le=100)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_get_vessels", annotations={"title": "Live ship positions (AIS)", **_RO})
+async def transport_get_vessels(params: VesselsInput) -> str:
+    """Get live ship positions in Finnish/Baltic waters from Fintraffic AIS (Digitraffic).
+
+    Optionally restrict to a bounding box (e.g. the Gulf of Finland ~ 24.0,59.7 → 26.0,60.3).
+    Speeds are in knots. Vessel names come from AIS metadata.
+
+    Args:
+        params (VesselsInput): optional min_lat/max_lat/min_lon/max_lon bounding box,
+            moving_only (bool), limit (int 1-100), response_format.
+
+    Returns:
+        str: Markdown table (Vessel, MMSI, Speed kn, Lat, Lon) or JSON list. On failure "Error: ...".
+    """
+    try:
+        data = await request_json(f"{config.DIGITRAFFIC_MARINE_BASE}/ais/v1/locations", cache=False)
+        names = await _vessel_names()
+        feats = data.get("features", [])
+        out = []
+        for f in feats:
+            lon, lat = (f.get("geometry", {}).get("coordinates") or [None, None])[:2]
+            if lat is None or lon is None:
+                continue
+            if params.min_lat is not None and lat < params.min_lat:
+                continue
+            if params.max_lat is not None and lat > params.max_lat:
+                continue
+            if params.min_lon is not None and lon < params.min_lon:
+                continue
+            if params.max_lon is not None and lon > params.max_lon:
+                continue
+            props = f.get("properties", {})
+            sog = props.get("sog")
+            if params.moving_only and (sog is None or sog < 0.5):
+                continue
+            mmsi = props.get("mmsi") or f.get("mmsi")
+            meta = names.get(int(mmsi), {}) if mmsi is not None else {}
+            out.append(
+                {
+                    "name": meta.get("name") or f"MMSI {mmsi}",
+                    "mmsi": mmsi,
+                    "speed_kn": sog,
+                    "lat": round(lat, 4),
+                    "lon": round(lon, 4),
+                }
+            )
+            if len(out) >= params.limit:
+                break
+        if not out:
+            return "No vessels found for that area/filter right now."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"count": len(out), "vessels": out})
+        rows = [[o["name"], o["mmsi"], o["speed_kn"], o["lat"], o["lon"]] for o in out]
+        return "# Live ship positions (AIS)\n\n" + md_table(
+            ["Vessel", "MMSI", "Speed (kn)", "Lat", "Lon"], rows
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+# Curated road-weather sensors (Finnish source names) -> readable labels.
+ROAD_SENSOR_LABELS = {
+    "ILMA": "Air temperature",
+    "TIE_1": "Road surface temperature",
+    "KELI_1": "Road condition",
+    "KITKA_1": "Friction",
+    "ILMAN_KOSTEUS": "Air humidity",
+    "KESKITUULI": "Wind speed (avg)",
+    "MAKSIMITUULI": "Wind speed (gust)",
+    "SADE": "Precipitation",
+    "SATEEN_INTENSITEETTI": "Rain intensity",
+    "NÄKYVYYS": "Visibility",
+}
+
+
+class RoadWeatherInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    station: str = Field(..., description="Road weather station name or numeric id, e.g. 'Kirkkonummi' or '1001'.")
+    all_sensors: bool = Field(default=False, description="Return every sensor instead of the curated set.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_get_road_weather", annotations={"title": "Road weather conditions", **_RO})
+async def transport_get_road_weather(params: RoadWeatherInput) -> str:
+    """Get current road-weather sensor readings from a Fintraffic road weather station.
+
+    Args:
+        params (RoadWeatherInput): station (name or id), all_sensors (bool), response_format.
+
+    Returns:
+        str: Air/road temperature, road condition, friction, wind, humidity, etc. with units and
+        measurement time. Use all_sensors=true for the full sensor list. On failure "Error: ...".
+    """
+    try:
+        station_id = params.station.strip()
+        if not station_id.isdigit():
+            stations = await request_json(f"{config.DIGITRAFFIC_ROAD_BASE}/weather/v1/stations")
+            ql = station_id.lower()
+            match = next(
+                (
+                    f for f in stations.get("features", [])
+                    if ql in (f.get("properties", {}).get("name", "") or "").lower()
+                ),
+                None,
+            )
+            if match is None:
+                return f"No road weather station found matching '{params.station}'."
+            station_id = str(match.get("id") or match.get("properties", {}).get("id"))
+        data = await request_json(
+            f"{config.DIGITRAFFIC_ROAD_BASE}/weather/v1/stations/{station_id}/data", cache=False
+        )
+        sensors = data.get("sensorValues", [])
+        picked = []
+        for s in sensors:
+            name = s.get("name", "")
+            if params.all_sensors or name in ROAD_SENSOR_LABELS:
+                picked.append(
+                    {
+                        "sensor": ROAD_SENSOR_LABELS.get(name, name),
+                        "value": s.get("value"),
+                        "unit": s.get("unit", ""),
+                        "time": s.get("measuredTime", ""),
+                    }
+                )
+        if not picked:
+            return f"Station {station_id} reported no matching sensors (try all_sensors=true)."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"stationId": station_id, "updated": data.get("dataUpdatedTime"), "sensors": picked})
+        rows = [[p["sensor"], f"{p['value']} {p['unit']}".strip()] for p in picked]
+        return (
+            f"# Road weather — station {station_id}\n\n"
+            + md_table(["Sensor", "Reading"], rows)
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "transport_find_station",
     "transport_get_station_trains",
     "transport_get_traffic_messages",
     "transport_plan_route",
     "transport_find_weather_cameras",
+    "transport_get_vessels",
+    "transport_get_road_weather",
 ]

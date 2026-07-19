@@ -47,6 +47,7 @@ FINGRID_BASE = "https://data.fingrid.fi/api"
 FMI_WFS_BASE = "https://opendata.fmi.fi/wfs"
 DIGITRAFFIC_RAIL_BASE = "https://rata.digitraffic.fi/api/v1"
 DIGITRAFFIC_ROAD_BASE = "https://tie.digitraffic.fi/api"
+DIGITRAFFIC_MARINE_BASE = "https://meri.digitraffic.fi/api"
 PRH_YTJ_BASE = "https://avoindata.prh.fi/opendata-ytj-api/v3"
 AVOINDATA_CKAN_BASE = "https://www.avoindata.fi/data/api/3/action"
 STATFIN_PXWEB_BASE = "https://pxdata.stat.fi/PxWeb/api/v1/en"
@@ -56,5 +57,7 @@ DIGITRANSIT_GEOCODING_BASE = "https://api.digitransit.fi/geocoding/v1"
 # Civic & culture (key-less).
 EDUSKUNTA_BASE = "https://avoindata.eduskunta.fi/api/v1"
 FINNA_BASE = "https://api.finna.fi/v1"
+# Suomi.fi Finnish Service Catalogue (PTV), open read API.
+PTV_BASE = "https://api.palvelutietovaranto.suomi.fi/api/v11"
 # National Land Survey (Maanmittauslaitos) geocoding — needs a free API key.
 NLS_GEOCODING_BASE = "https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias"
