@@ -33,6 +33,32 @@ Three tools need a free key (see Configuration): `transport_plan_route` (Digitra
 `energy_fingrid_latest` (Fingrid), and `places_geocode` (National Land Survey). Everything
 else is key-less.
 
+### Services & data sources
+
+Every Finnish service this repository integrates, what it provides, and whether it needs a key:
+
+| Service (provider) | Provides | Key | Domain |
+| --- | --- | --- | --- |
+| porssisahko.net / spot-hinta.fi | Hourly electricity spot price (Nord Pool FI), c/kWh incl. VAT | no | Energy |
+| Fingrid open data | Grid load, production mix, wind/nuclear/hydro time series | free key | Energy |
+| FMI — Finnish Meteorological Institute | Forecasts, station observations, sea level & waves | no | Weather |
+| HSY (via FMI `urban::`) | Helsinki-region air quality | no | Weather |
+| Fintraffic Digitraffic — rail | VR live trains, timetables, station metadata | no | Transport |
+| Fintraffic Digitraffic — road | Traffic messages, weather cameras, road-weather stations | no | Transport |
+| Fintraffic Digitraffic — marine | AIS live ship positions, port calls | no | Transport |
+| Digitransit | Nationwide public-transport journey planning + geocoding | free key | Transport |
+| PRH / YTJ | Business register — companies, Business IDs (Y-tunnus) | no | Registers |
+| avoindata.fi (DVV) | National open-data catalogue (dataset discovery) | no | Registers |
+| Statistics Finland (Tilastokeskus) | StatFin statistical database (PxWeb) | no | Registers |
+| Suomi.fi PTV | Finnish Service Catalogue — public services & channels | no | Registers |
+| Eduskunta | Parliament — MPs, seat composition, votes & breakdowns | no | Civic |
+| Finna (National Library) | Libraries, museums & archives search | no | Culture |
+| Maanmittauslaitos (NLS) | Geocoding — place/address → coordinates | free key | Places |
+| Kirjastot.fi | Public libraries — directory & opening hours | no | Library |
+
+All data is public and open; each source sets its own license (mostly CC BY 4.0 — attribute
+the originator). See the [tool reference](./docs/TOOLS.md) for the tools built on each.
+
 See [`PLAN.md`](./PLAN.md) for architecture, [`AGENTS.md`](./AGENTS.md) for a code map, and
 [`skills/`](./skills) for per-domain CLI playbooks.
 
