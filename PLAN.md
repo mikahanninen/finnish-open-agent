@@ -6,15 +6,18 @@ build them.
 
 ## 1. Vision
 
-Give an AI agent first-class, reliable access to **Finland's public, open data** through
-two access modes that share one design:
+Be **open-source, portable, and agent-friendly** — one codebase, three delivery modes that
+share one implementation so they never diverge:
 
-- **MCP server** — the primary interface. A single server (`finnish_services_mcp`) presents
-  every source as a small set of typed, documented tools. This is what you connect to
-  Claude Desktop, Claude Code, or any MCP client.
-- **Skills (CLI approach)** — Markdown playbooks that let an agent reach the same data with
-  `curl`/`uvx` one-liners when no server is running, or when a human wants a copy-pasteable
-  recipe. Skills reference the same endpoints the server wraps, so the two never diverge.
+- **CLI for humans** — `finnish-open-agent call <tool> key=value ...` runs any tool from the
+  terminal (`cli.py` introspects the tool registry, so every tool is a subcommand).
+- **JSON output for AI tools** — the same call with `--json` (or `response_format=json`)
+  returns machine-readable output for scripting and pipelines.
+- **Skills + MCP server for agents** — `finnish_services_mcp` presents every source as typed,
+  documented MCP tools for Claude Desktop / Code / any MCP client; per-domain **skills**
+  (Markdown playbooks) give agents the plain-`curl` path when no server is running.
+
+Adding one `@mcp.tool` yields all three modes automatically — no per-mode wiring.
 
 Guiding principles: **key-less first** (nearly every source is open), **agent-friendly
 output** (Markdown for reading, JSON for chaining), **honest attribution** (open data still
@@ -166,6 +169,12 @@ tests, docs, skill. ✅
 - Weather: sea level & waves (`weather_get_sea`). ✅
 - AI-discoverability: `AGENTS.md`/`llms.txt` index + generated `docs/TOOLS.md`; per-domain
   skills; GitHub Actions CI (lint, tests, doc-freshness `--check`). ✅
+
+**Phase 3.6 — CLI + wider coverage.** ✅ (30 tools)
+- Unified `cli.py`: every tool usable as `call <tool> k=v [--json]`; realises the CLI/JSON/MCP
+  vision from one codebase. ✅
+- Transport: ship port calls (`transport_get_port_calls`). ✅
+- New Library domain: `library_search` (Kirjastot.fi — public libraries & opening hours). ✅
 
 **Phase 4 — quality & distribution.** Evaluation suite (per mcp-builder §4), rate-limit
 handling, publish to an MCP registry, optional Docker image for the HTTP mode.

@@ -1,16 +1,20 @@
 # 🇫🇮 Finnish Open Agent
 
-An agentic toolkit for **Finland's open data and public-service APIs**. It ships two
-complementary things:
+An agentic toolkit for **Finland's open data and public-service APIs**. It is open-source,
+portable, and agent-friendly — one codebase, three ways to use it:
 
-1. **An MCP server** (`finnish_services_mcp`) that exposes Finnish open APIs as clean,
-   agent-friendly tools — usable from Claude Desktop, Claude Code, or any MCP client.
-2. **Skills** (Markdown playbooks) that teach an agent how to reach the same data with a
-   plain **CLI / `curl` approach** when an MCP server isn't available.
+1. **CLI for humans** — `finnish-open-agent call <tool> key=value ...` runs any tool from the
+   terminal.
+2. **JSON output for AI tools** — add `--json` (or `response_format=json`) for machine-readable
+   output.
+3. **MCP server for agents** — `finnish_services_mcp` exposes every tool to Claude Desktop,
+   Claude Code, or any MCP client; and **skills** (Markdown playbooks) teach agents the
+   plain-`curl` path when no server is running.
 
-Most services need **no API key**. Everything here is public, open data.
+Every tool is available in all three modes automatically. Most services need **no API key** —
+everything here is public, open data.
 
-## Domains (v0.5 — 28 tools)
+## Domains (v0.6 — 30 tools)
 
 Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
@@ -18,11 +22,12 @@ Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-ge
 | --- | --- | --- |
 | ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | spot prices, price now, cheapest hours, Fingrid data |
 | 🌦️ Weather | FMI, HSY | forecast, observations, air quality, sea level & waves |
-| 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, ships (AIS), journey routing |
+| 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, ships (AIS), port calls, journey routing |
 | 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search, StatFin browse & data, public-service search & detail |
 | 🏛️ Civic | Eduskunta (Parliament) | MP search, seat composition, recent votes, vote breakdowns |
 | 🎭 Culture | Finna | cultural-heritage search |
 | 🗺️ Places | National Land Survey (MML) | geocoding |
+| 📚 Library | Kirjastot.fi | public library search & opening hours |
 
 Three tools need a free key (see Configuration): `transport_plan_route` (Digitransit),
 `energy_fingrid_latest` (Fingrid), and `places_geocode` (National Land Survey). Everything
@@ -39,8 +44,16 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv venv
 uv pip install -e ".[dev]"
 
-# Run the MCP server over stdio (default)
-uv run finnish-open-agent
+# 1) CLI for humans — run any tool from the terminal
+uv run finnish-open-agent list                                  # list all tools
+uv run finnish-open-agent call energy_cheapest_hours count=3    # human-readable
+uv run finnish-open-agent call library_search query=Oodi        # today's opening hours
+
+# 2) JSON output for AI/scripting — add --json
+uv run finnish-open-agent call weather_get_forecast place=Helsinki hours=6 --json
+
+# 3) MCP server for agents (stdio by default)
+uv run finnish-open-agent            # or: finnish-open-agent serve
 ```
 
 ### Use it from Claude Desktop / Claude Code

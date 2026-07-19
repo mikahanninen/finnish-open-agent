@@ -1,6 +1,6 @@
 [project]
 name = "finnish-open-agent"
-version = "0.5.0"
+version = "0.6.0"
 description = "Agentic toolkit for Finnish open data & public-service APIs: an MCP server plus CLI-oriented skills."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,7 +22,7 @@ dev = [
 ]
 
 [project.scripts]
-finnish-open-agent = "finnish_open_agent.server:main"
+finnish-open-agent = "finnish_open_agent.cli:main"
 
 [build-system]
 requires = ["hatchling"]

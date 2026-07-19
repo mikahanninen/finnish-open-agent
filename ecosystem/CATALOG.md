@@ -8,17 +8,17 @@ A curated, link-only index of skills, MCP servers, and agentic tools for Finnish
 
 ## ⚡ Energy
 
-### [Finnish Open Data (CLI skill)](https://github.com/mika-hanninen/finnish-open-agent/tree/main/skills/finnish-open-data) `Skill`
+### [Finnish Open Data (CLI skill)](https://github.com/mikahanninen/finnish-open-agent/tree/main/skills/finnish-open-data) `Skill`
 
 A copy-pasteable curl/jq playbook for the same Finnish open APIs, for use when no MCP server is connected.
 
 **Author:** Finnish Open Agent · _first-party_ · **License:** MIT · **Lang:** Markdown · **Tags:** curl, cli, open-data
 
-### [Finnish Services MCP](https://github.com/mika-hanninen/finnish-open-agent/tree/main/src/finnish_open_agent) `MCP`
+### [Finnish Services MCP](https://github.com/mikahanninen/finnish-open-agent/tree/main/src/finnish_open_agent) `MCP`
 
-MCP server exposing Finnish open data as 28 tools: electricity spot prices, FMI weather/air-quality/sea, Digitraffic road/rail/marine + Digitransit routing, PRH/YTJ, avoindata.fi, Statistics Finland and Suomi.fi services, Eduskunta (Parliament) MPs & votes, Finna cultural search, and NLS geocoding.
+Open-source, portable, agent-friendly toolkit exposing Finnish open data as 30 tools — usable as a CLI (human), JSON (AI), or MCP server. Covers electricity prices, FMI weather/air-quality/sea, Digitraffic road/rail/marine + Digitransit routing, PRH/YTJ, avoindata.fi, Statistics Finland & Suomi.fi services, Eduskunta MPs & votes, Finna culture, NLS geocoding, and libraries.
 
-**Author:** Finnish Open Agent · _first-party_ · **License:** MIT · **Lang:** Python · **Tags:** digitraffic, fmi, prh, statistics-finland, eduskunta, finna
+**Author:** Finnish Open Agent · _first-party_ · **License:** MIT · **Lang:** Python · **Tags:** digitraffic, fmi, prh, statistics-finland, eduskunta, finna, cli
 
 ## 🎓 Education
 

@@ -13,6 +13,7 @@ skills directory (e.g. `~/.claude/skills/`).
 | [`finnish-civic`](./finnish-civic) | Parliament: MPs, seats, votes | `civic_*` |
 | [`finnish-culture`](./finnish-culture) | Finna: libraries, museums, archives | `culture_search` |
 | [`finnish-places`](./finnish-places) | National Land Survey geocoding | `places_geocode` |
+| [`finnish-library`](./finnish-library) | Public libraries & opening hours (Kirjastot.fi) | `library_search` |
 | [`finnish-open-data`](./finnish-open-data) | Umbrella index (general "Finnish open data") | — |
 
 When the `finnish_services_mcp` MCP server is connected, prefer its tools over curl — see the

@@ -528,6 +528,63 @@ async def transport_get_road_weather(params: RoadWeatherInput) -> str:
         return handle_error(exc)
 
 
+class PortCallsInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    port: Optional[str] = Field(
+        default=None,
+        description="UN/LOCODE of a Finnish port to filter by, e.g. FIHEL (Helsinki), FITKU "
+        "(Turku), FIKTK (Kotka), FIRAU (Rauma), FIOUL (Oulu). Omit for all ports.",
+    )
+    limit: int = Field(default=15, ge=1, le=100)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_get_port_calls", annotations={"title": "Ship port calls", **_RO})
+async def transport_get_port_calls(params: PortCallsInput) -> str:
+    """Get recent and upcoming ship port calls at Finnish ports (Fintraffic Digitraffic).
+
+    Args:
+        params (PortCallsInput): port (optional UN/LOCODE), limit (int 1-100), response_format.
+
+    Returns:
+        str: Markdown table (Vessel, Port, Time, From→To) or JSON list of
+        {"vessel","port","time","prevPort","nextPort","mmsi"}. On failure "Error: ...".
+    """
+    try:
+        data = await request_json(
+            f"{config.DIGITRAFFIC_MARINE_BASE}/port-call/v1/port-calls", cache=False
+        )
+        calls = data.get("portCalls", [])
+        pf = (params.port or "").strip().upper()
+        out = []
+        for c in calls:
+            if pf and (c.get("portToVisit") or "").upper() != pf:
+                continue
+            out.append(
+                {
+                    "vessel": (c.get("vesselName") or "").strip() or f"MMSI {c.get('mmsi')}",
+                    "port": c.get("portToVisit", ""),
+                    "time": c.get("portCallTimestamp", ""),
+                    "prevPort": c.get("prevPort", ""),
+                    "nextPort": c.get("nextPort", ""),
+                    "mmsi": c.get("mmsi"),
+                }
+            )
+            if len(out) >= params.limit:
+                break
+        if not out:
+            return f"No port calls found{f' for {pf}' if pf else ''} right now."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"count": len(out), "portCalls": out})
+        rows = [
+            [o["vessel"], o["port"], o["time"].replace("T", " ")[:16], f"{o['prevPort']}→{o['nextPort']}"]
+            for o in out
+        ]
+        return "# Ship port calls\n\n" + md_table(["Vessel", "Port", "Time (UTC)", "From→To"], rows)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "transport_find_station",
     "transport_get_station_trains",
@@ -536,4 +593,5 @@ __all__ = [
     "transport_find_weather_cameras",
     "transport_get_vessels",
     "transport_get_road_weather",
+    "transport_get_port_calls",
 ]

@@ -93,3 +93,18 @@ async def test_sea_level_live():
 
     out = await weather.weather_get_sea(SeaInput(place="Helsinki", kind="sealevel", hours=2))
     assert "sealevel" in out.lower() and "Error" not in out
+
+
+async def test_port_calls_live():
+    from finnish_open_agent.tools.transport import PortCallsInput
+
+    out = await transport.transport_get_port_calls(PortCallsInput(port="FIHEL", limit=3))
+    assert ("Port" in out or "port" in out.lower()) and "Error" not in out
+
+
+async def test_library_search_live():
+    from finnish_open_agent.tools import library
+    from finnish_open_agent.tools.library import LibrarySearchInput
+
+    out = await library.library_search(LibrarySearchInput(query="Oodi", limit=2))
+    assert "Oodi" in out and "Error" not in out

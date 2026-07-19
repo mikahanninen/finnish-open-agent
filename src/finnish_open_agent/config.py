@@ -59,5 +59,7 @@ EDUSKUNTA_BASE = "https://avoindata.eduskunta.fi/api/v1"
 FINNA_BASE = "https://api.finna.fi/v1"
 # Suomi.fi Finnish Service Catalogue (PTV), open read API.
 PTV_BASE = "https://api.palvelutietovaranto.suomi.fi/api/v11"
+# Kirjastot.fi — Finnish public library directory & opening hours (key-less).
+KIRJASTOT_BASE = "https://api.kirjastot.fi/v4"
 # National Land Survey (Maanmittauslaitos) geocoding — needs a free API key.
 NLS_GEOCODING_BASE = "https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias"

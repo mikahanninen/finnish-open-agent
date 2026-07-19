@@ -24,23 +24,32 @@ of other Finnish skills/MCPs. Python, managed with `uv`. Most APIs need no key.
 
 ```
 src/finnish_open_agent/
+  cli.py            CLI entry point: `list`, `call <tool> k=v --json`, default = serve
   app.py            FastMCP instance + server instructions
-  server.py         entry point (stdio default; FOA_TRANSPORT=http for remote)
+  server.py         MCP server runner (stdio default; FOA_TRANSPORT=http for remote)
   config.py         base URLs + env-driven settings & API keys
   _http.py          shared async client, TTL cache, error formatting
   tools/            one module per domain; each @mcp.tool lives here
-    energy · weather · transport · registers · civic · culture · places
+    energy · weather · transport · registers · civic · culture · places · library
 scripts/
   render_tools.py   regenerates docs/TOOLS.md  (CI runs --check)
   render_catalog.py regenerates ecosystem/CATALOG.md  (CI runs --check)
-tests/              offline (test_parsing/test_registry) + live (test_live, -m live)
+tests/              offline (test_parsing/registry/docs/cli) + live (test_live, -m live)
 ```
+
+## Three delivery modes (one codebase)
+
+The `cli.py` registry introspects every `@mcp.tool` so each tool is usable as:
+CLI (`finnish-open-agent call <tool> k=v`), JSON (`--json`), and MCP (`serve`). New tools get
+all three automatically — no per-tool CLI wiring.
 
 ## Run it
 
 ```bash
 uv venv && uv pip install -e ".[dev]"
-uv run finnish-open-agent            # stdio MCP server
+uv run finnish-open-agent list          # list tools (CLI)
+uv run finnish-open-agent call energy_get_price_now   # call one
+uv run finnish-open-agent               # stdio MCP server (default)
 uv run python -m pytest -m "not live"   # offline tests
 uv run ruff check src tests scripts
 ```

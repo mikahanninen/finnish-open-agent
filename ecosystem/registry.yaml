@@ -10,8 +10,8 @@
 # ---------------------------------------------------------------------------
 version: 1
 
-# Set this once to your canonical repository URL; first-party entries link here.
-self_repo: "https://github.com/mika-hanninen/finnish-open-agent"  # TODO: confirm/update
+# Canonical repository URL; first-party entries link here.
+self_repo: "https://github.com/mikahanninen/finnish-open-agent"
 
 entries:
   # --- First-party (shipped in this repo) --------------------------------
@@ -23,14 +23,14 @@ entries:
     path: src/finnish_open_agent
     license: MIT
     language: Python
-    domains: [energy, weather, transport, registers, civic, culture]
-    tags: [digitraffic, fmi, prh, statistics-finland, eduskunta, finna]
+    domains: [energy, weather, transport, registers, civic, culture, library]
+    tags: [digitraffic, fmi, prh, statistics-finland, eduskunta, finna, cli]
     description: >-
-      MCP server exposing Finnish open data as 28 tools: electricity spot
-      prices, FMI weather/air-quality/sea, Digitraffic road/rail/marine +
-      Digitransit routing, PRH/YTJ, avoindata.fi, Statistics Finland and
-      Suomi.fi services, Eduskunta (Parliament) MPs & votes, Finna cultural
-      search, and NLS geocoding.
+      Open-source, portable, agent-friendly toolkit exposing Finnish open data
+      as 30 tools — usable as a CLI (human), JSON (AI), or MCP server. Covers
+      electricity prices, FMI weather/air-quality/sea, Digitraffic road/rail/marine +
+      Digitransit routing, PRH/YTJ, avoindata.fi, Statistics Finland & Suomi.fi
+      services, Eduskunta MPs & votes, Finna culture, NLS geocoding, and libraries.
 
   - id: finnish-open-data-skill
     name: Finnish Open Data (CLI skill)

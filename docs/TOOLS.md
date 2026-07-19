@@ -2,7 +2,7 @@
 
 > Auto-generated from the live MCP server by `scripts/render_tools.py`. **Do not edit by hand.**
 
-**28 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
+**30 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
 
 ## ⚡ Energy
 
@@ -102,6 +102,16 @@ Find Finnish road weather-camera stations by name (Fintraffic Digitraffic).
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `query` | yes | Text to match in a camera station name, e.g. 'Kirkkonummi' or 'vt1'. |
+| `limit` | no |  |
+| `response_format` | no |  |
+
+### `transport_get_port_calls`
+
+Get recent and upcoming ship port calls at Finnish ports (Fintraffic Digitraffic).
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `port` | no | UN/LOCODE of a Finnish port to filter by, e.g. FIHEL (Helsinki), FITKU (Turku), FIKTK (Kotka), FIRAU (Rauma), FIOUL (Oulu). Omit for all ports. |
 | `limit` | no |  |
 | `response_format` | no |  |
 
@@ -288,6 +298,19 @@ Geocode a Finnish place name or address to coordinates (National Land Survey / M
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `text` | yes | Place name or address, e.g. 'Mannerheimintie 1, Helsinki'. |
+| `limit` | no |  |
+| `response_format` | no |  |
+
+## Library
+
+### `library_search`
+
+Search Finnish public libraries by name and/or city, with today's opening hours.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `query` | no | Library name to search, e.g. 'Oodi', 'pääkirjasto'. |
+| `city` | no | Filter by city/municipality, e.g. 'Tampere'. |
 | `limit` | no |  |
 | `response_format` | no |  |
 

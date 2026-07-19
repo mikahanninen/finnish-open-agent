@@ -40,6 +40,14 @@ def test_translated_extracts_labels():
     items = [{"translated": "Kirja", "value": "0/Book/"}, {"value": "CD"}]
     assert _translated(items) == "Kirja, CD"
 
+
+def test_library_today_hours():
+    from finnish_open_agent.tools.library import _today_hours
+
+    assert _today_hours({"schedules": [{"closed": False, "times": [{"from": "10:00", "to": "20:00"}]}]}) == "10:00–20:00"
+    assert _today_hours({"schedules": [{"closed": True}]}) == "closed today"
+    assert _today_hours({}) == ""
+
 SAMPLE_FMI = """<?xml version="1.0" encoding="UTF-8"?>
 <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"
     xmlns:BsWfs="http://xml.fmi.fi/schema/wfs/2.0"
