@@ -33,7 +33,7 @@ def test_catalog_is_up_to_date():
 def test_wilma_entry_present_and_attributed():
     rc = _load_module()
     entries = {e["id"]: e for e in rc.load_registry()["entries"]}
-    wilma = entries.get("wilma-bot")
+    wilma = entries.get("wilmai")
     assert wilma is not None
-    assert wilma["author"] == "jookos"
-    assert wilma["repo"].startswith("https://github.com/jookos/wilma-bot")
+    assert wilma["author"] == "aikarjal"
+    assert wilma["repo"].startswith("https://github.com/aikarjal/wilmai")

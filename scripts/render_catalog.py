@@ -115,6 +115,8 @@ def render(data: dict) -> str:
             meta = [f"**Author:** {e['author']}{fp}", f"**License:** {e['license']}"]
             if e.get("language"):
                 meta.append(f"**Lang:** {e['language']}")
+            if e.get("homepage"):
+                meta.append(f"**Site:** {e['homepage']}")
             if tags:
                 meta.append(f"**Tags:** {tags}")
             lines.append(" · ".join(meta))

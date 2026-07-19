@@ -83,8 +83,9 @@ its author under its own license; nothing is copied here. Browse
 [`ecosystem/CATALOG.md`](./ecosystem/CATALOG.md) (auto-generated from
 [`ecosystem/registry.yaml`](./ecosystem/registry.yaml)).
 
-Featured community entry: **[Wilma Bot](https://github.com/jookos/wilma-bot)** by `jookos` — an
-MCP server + skill for the Visma Wilma school system (inbox, schedule, notices).
+Featured community entry: **[WilmAI](https://github.com/aikarjal/wilmai)** by `aikarjal`
+([wilm.ai](https://www.wilm.ai/)) — an open-source CLI that reads the Wilma school system
+(schedule, homework, grades, attendance…) as clean JSON, with an AI-agent-friendly mode.
 
 Want your project listed? Add one entry to the registry and open a PR — see
 [CONTRIBUTING.md](./CONTRIBUTING.md). To regenerate the catalog:

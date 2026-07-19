@@ -46,19 +46,20 @@ entries:
       when no MCP server is connected.
 
   # --- Community entries (external; link-only, full credit to authors) ----
-  - id: wilma-bot
-    name: Wilma Bot
-    kinds: [mcp, skill]
-    author: jookos
-    repo: "https://github.com/jookos/wilma-bot"
-    # License is declared as MIT in the project README; no LICENSE file yet at
-    # time of listing. Recorded as the author states it.
-    license: MIT (per README)
-    language: Python
+  - id: wilmai
+    name: WilmAI
+    kinds: [library]
+    author: aikarjal
+    repo: "https://github.com/aikarjal/wilmai"
+    homepage: "https://www.wilm.ai/"
+    license: MIT
+    language: TypeScript
     domains: [education]
-    tags: [wilma, visma, school, education]
+    tags: [wilma, school, cli, agent-friendly, json]
     added: "2026-07-19"
     description: >-
-      A Visma Wilma client for your agentic life: an MCP server (plus skill)
-      that exposes your Wilma inbox, weekly schedule, and notices as tools,
-      with full Wilma session authentication and token refresh.
+      An independent, open-source CLI that reads Finland's Wilma school system —
+      schedules, homework, exams, grades, attendance, messages, and news — as
+      consistent JSON across tenants. Ships an interactive parent dashboard plus
+      a non-interactive command mode designed for AI-agent integration.
+      Unaffiliated with Visma.

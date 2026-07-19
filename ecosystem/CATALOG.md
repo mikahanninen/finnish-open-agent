@@ -22,11 +22,11 @@ MCP server exposing Finnish open data as 17 tools: electricity spot prices, FMI 
 
 ## 🎓 Education
 
-### [Wilma Bot](https://github.com/jookos/wilma-bot) `MCP` `Skill`
+### [WilmAI](https://github.com/aikarjal/wilmai) `Library`
 
-A Visma Wilma client for your agentic life: an MCP server (plus skill) that exposes your Wilma inbox, weekly schedule, and notices as tools, with full Wilma session authentication and token refresh.
+An independent, open-source CLI that reads Finland's Wilma school system — schedules, homework, exams, grades, attendance, messages, and news — as consistent JSON across tenants. Ships an interactive parent dashboard plus a non-interactive command mode designed for AI-agent integration. Unaffiliated with Visma.
 
-**Author:** jookos · **License:** MIT (per README) · **Lang:** Python · **Tags:** wilma, visma, school, education
+**Author:** aikarjal · **License:** MIT · **Lang:** TypeScript · **Site:** https://www.wilm.ai/ · **Tags:** wilma, school, cli, agent-friendly, json
 
 ---
 
