@@ -75,6 +75,24 @@ All configuration is via environment variables (see [`.env.example`](./.env.exam
 | `FOA_TRANSPORT` | `stdio` | `stdio` (local) or `http` (remote streamable HTTP) |
 | `FOA_HOST` / `FOA_PORT` | `127.0.0.1` / `8000` | Bind address for HTTP transport |
 
+## 🇫🇮 Community collection
+
+Beyond this repo's own tools, `finnish-open-agent` curates a directory of **other people's**
+Finnish skills, MCP servers, and agentic tools. It's link-only — every project stays owned by
+its author under its own license; nothing is copied here. Browse
+[`ecosystem/CATALOG.md`](./ecosystem/CATALOG.md) (auto-generated from
+[`ecosystem/registry.yaml`](./ecosystem/registry.yaml)).
+
+Featured community entry: **[Wilma Bot](https://github.com/jookos/wilma-bot)** by `jookos` — an
+MCP server + skill for the Visma Wilma school system (inbox, schedule, notices).
+
+Want your project listed? Add one entry to the registry and open a PR — see
+[CONTRIBUTING.md](./CONTRIBUTING.md). To regenerate the catalog:
+
+```bash
+uv run python scripts/render_catalog.py
+```
+
 ## CLI / skill approach
 
 Prefer not to run a server? The [`skills/finnish-open-data`](./skills/finnish-open-data)

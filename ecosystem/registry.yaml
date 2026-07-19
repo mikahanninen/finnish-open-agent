@@ -1,0 +1,64 @@
+# Finnish Open Agent — community registry
+# ---------------------------------------------------------------------------
+# A curated index of skills, MCP servers, and agentic tools for Finnish
+# services. We LINK to each project at its source; we do NOT copy anyone's
+# code into this repo. Each author keeps ownership, license, and credit.
+#
+# To add your project, open a PR that appends an entry below and run
+# `python scripts/render_catalog.py` to regenerate ecosystem/CATALOG.md.
+# See CONTRIBUTING.md for the (short) inclusion criteria.
+# ---------------------------------------------------------------------------
+version: 1
+
+# Set this once to your canonical repository URL; first-party entries link here.
+self_repo: "https://github.com/mika-hanninen/finnish-open-agent"  # TODO: confirm/update
+
+entries:
+  # --- First-party (shipped in this repo) --------------------------------
+  - id: finnish-services-mcp
+    name: Finnish Services MCP
+    kinds: [mcp]
+    author: Finnish Open Agent
+    first_party: true
+    path: src/finnish_open_agent
+    license: MIT
+    language: Python
+    domains: [energy, weather, transport, registers]
+    tags: [digitraffic, fmi, prh, statistics-finland, spot-price]
+    description: >-
+      MCP server exposing Finnish open data as 17 tools: electricity spot
+      prices, FMI weather & air quality, Digitraffic road/rail + Digitransit
+      journey planning, and the PRH/YTJ, avoindata.fi and Statistics Finland
+      registers.
+
+  - id: finnish-open-data-skill
+    name: Finnish Open Data (CLI skill)
+    kinds: [skill]
+    author: Finnish Open Agent
+    first_party: true
+    path: skills/finnish-open-data
+    license: MIT
+    language: Markdown
+    domains: [energy, weather, transport, registers]
+    tags: [curl, cli, open-data]
+    description: >-
+      A copy-pasteable curl/jq playbook for the same Finnish open APIs, for use
+      when no MCP server is connected.
+
+  # --- Community entries (external; link-only, full credit to authors) ----
+  - id: wilma-bot
+    name: Wilma Bot
+    kinds: [mcp, skill]
+    author: jookos
+    repo: "https://github.com/jookos/wilma-bot"
+    # License is declared as MIT in the project README; no LICENSE file yet at
+    # time of listing. Recorded as the author states it.
+    license: MIT (per README)
+    language: Python
+    domains: [education]
+    tags: [wilma, visma, school, education]
+    added: "2026-07-19"
+    description: >-
+      A Visma Wilma client for your agentic life: an MCP server (plus skill)
+      that exposes your Wilma inbox, weekly schedule, and notices as tools,
+      with full Wilma session authentication and token refresh.
