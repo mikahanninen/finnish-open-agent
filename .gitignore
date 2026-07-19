@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+# uv / venv (lockfile IS committed for reproducibility)
+.venv/
+# Env & secrets
+.env
+# Test / tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+# OS
+.DS_Store
+
+# transient (safe to remove)
+_to_delete/

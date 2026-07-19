@@ -1,0 +1,18 @@
+{
+  "//": "Example MCP client config. Copy the 'finnish-open-agent' block into your",
+  "//2": "claude_desktop_config.json (or Claude Code MCP settings). Adjust the path.",
+  "mcpServers": {
+    "finnish-open-agent": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/mika/koodi/finnish-open-agent",
+        "run",
+        "finnish-open-agent"
+      ],
+      "env": {
+        "FOA_APP_ID": "mika/finnish-open-agent"
+      }
+    }
+  }
+}

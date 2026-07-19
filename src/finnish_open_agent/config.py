@@ -1,0 +1,50 @@
+"""Central configuration for the Finnish Open Agent MCP server.
+
+All settings are read from environment variables so the same code works both as a
+local stdio server and as a remote HTTP server. Nothing here is required to run
+the open, key-less services (energy spot prices, FMI weather, Digitraffic,
+PRH/YTJ, avoindata.fi). Optional API keys unlock the few services that need them.
+"""
+
+from __future__ import annotations
+
+import os
+
+# ---------------------------------------------------------------------------
+# Identity / politeness
+# ---------------------------------------------------------------------------
+# Several Finnish APIs (notably Fintraffic / Digitraffic) ask every caller to
+# identify themselves with a header so they can contact you about breaking
+# changes. Set FOA_APP_ID to something like "my-company/my-app".
+APP_ID: str = os.environ.get("FOA_APP_ID", "finnish-open-agent")
+USER_AGENT: str = f"{APP_ID} (+https://github.com/)"
+
+# ---------------------------------------------------------------------------
+# HTTP behaviour
+# ---------------------------------------------------------------------------
+HTTP_TIMEOUT: float = float(os.environ.get("FOA_HTTP_TIMEOUT", "30"))
+# Simple in-process response cache TTL (seconds). Keeps us polite to upstream
+# APIs for slow-moving metadata like station lists. 0 disables caching.
+CACHE_TTL: float = float(os.environ.get("FOA_CACHE_TTL", "120"))
+
+# ---------------------------------------------------------------------------
+# Optional API keys (services that require registration)
+# ---------------------------------------------------------------------------
+# Free key from https://data.fingrid.fi/ -> "My subscriptions".
+FINGRID_API_KEY: str | None = os.environ.get("FINGRID_API_KEY") or None
+# Optional Digitransit subscription key (higher rate limits) from
+# https://portal-api.digitransit.fi/. The API also works key-less for light use.
+DIGITRANSIT_API_KEY: str | None = os.environ.get("DIGITRANSIT_API_KEY") or None
+
+# ---------------------------------------------------------------------------
+# Base URLs (kept here so they are easy to audit / override in tests)
+# ---------------------------------------------------------------------------
+PORSSISAHKO_BASE = "https://api.porssisahko.net/v1"
+SPOT_HINTA_BASE = "https://api.spot-hinta.fi"
+FINGRID_BASE = "https://data.fingrid.fi/api"
+FMI_WFS_BASE = "https://opendata.fmi.fi/wfs"
+DIGITRAFFIC_RAIL_BASE = "https://rata.digitraffic.fi/api/v1"
+DIGITRAFFIC_ROAD_BASE = "https://tie.digitraffic.fi/api"
+PRH_YTJ_BASE = "https://avoindata.prh.fi/opendata-ytj-api/v3"
+AVOINDATA_CKAN_BASE = "https://www.avoindata.fi/data/api/3/action"
+STATFIN_PXWEB_BASE = "https://pxdata.stat.fi/PxWeb/api/v1/en"
