@@ -15,6 +15,5 @@ dist/
 .mypy_cache/
 # OS
 .DS_Store
-
-# transient (safe to remove)
+# transient bridge/git litter (safe to remove; not part of the project)
 _to_delete/

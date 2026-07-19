@@ -48,3 +48,6 @@ DIGITRAFFIC_ROAD_BASE = "https://tie.digitraffic.fi/api"
 PRH_YTJ_BASE = "https://avoindata.prh.fi/opendata-ytj-api/v3"
 AVOINDATA_CKAN_BASE = "https://www.avoindata.fi/data/api/3/action"
 STATFIN_PXWEB_BASE = "https://pxdata.stat.fi/PxWeb/api/v1/en"
+# Digitransit (journey planning + geocoding). Both require a subscription key.
+DIGITRANSIT_ROUTING_BASE = "https://api.digitransit.fi/routing/v2/finland/gtfs/v1"
+DIGITRANSIT_GEOCODING_BASE = "https://api.digitransit.fi/geocoding/v1"

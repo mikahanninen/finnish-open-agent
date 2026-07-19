@@ -182,4 +182,79 @@ async def energy_fingrid_latest(params: FingridInput) -> str:
         return handle_error(exc)
 
 
-__all__ = ["energy_get_spot_prices", "energy_get_price_now", "energy_fingrid_latest"]
+class CheapestHoursInput(BaseModel):
+    """Input for finding the cheapest upcoming electricity hours."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    count: int = Field(default=3, ge=1, le=24, description="How many cheap hours to return.")
+    within_hours: int = Field(
+        default=24, ge=1, le=48,
+        description="Only consider hours starting within this many hours from now (search window).",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="energy_cheapest_hours", annotations={"title": "Cheapest electricity hours", **_RO})
+async def energy_cheapest_hours(params: CheapestHoursInput) -> str:
+    """Find the cheapest upcoming hours to run electricity-hungry appliances in Finland.
+
+    Considers upcoming hourly spot prices (from now, within the search window) and returns
+    the N cheapest, sorted by time so they are easy to schedule. Prices are c/kWh incl. VAT.
+
+    Args:
+        params (CheapestHoursInput): count (int 1-24), within_hours (int 1-48), response_format.
+
+    Returns:
+        str: Markdown table (time, c/kWh) of the cheapest hours, plus the single best hour;
+        or JSON {"unit","count","hours":[{"start","end","price"}]}. On failure "Error: ...".
+    """
+    from datetime import datetime, timedelta, timezone
+    from zoneinfo import ZoneInfo
+
+    try:
+        data = await request_json(f"{config.PORSSISAHKO_BASE}/latest-prices.json", cache=False)
+        now = datetime.now(timezone.utc)
+        horizon = now + timedelta(hours=params.within_hours)
+        upcoming = []
+        for p in data.get("prices", []):
+            start = datetime.fromisoformat(p["startDate"].replace("Z", "+00:00"))
+            end = datetime.fromisoformat(p["endDate"].replace("Z", "+00:00"))
+            if end > now and start < horizon:
+                upcoming.append({"start": p["startDate"], "end": p["endDate"],
+                                 "price": round(p["price"], 3), "_start": start})
+        if not upcoming:
+            return "No upcoming spot prices available for that window yet (tomorrow publishes ~14:00 EET)."
+        cheapest = sorted(upcoming, key=lambda p: p["price"])[: params.count]
+        cheapest_by_time = sorted(cheapest, key=lambda p: p["_start"])
+        best = min(cheapest, key=lambda p: p["price"])
+        for p in cheapest_by_time:
+            p.pop("_start", None)
+        best.pop("_start", None)
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"unit": "c/kWh incl. VAT", "count": len(cheapest_by_time),
+                            "hours": cheapest_by_time})
+
+        def fin(iso: str) -> str:
+            return (
+                datetime.fromisoformat(iso.replace("Z", "+00:00"))
+                .astimezone(ZoneInfo("Europe/Helsinki"))
+                .strftime("%a %d %b %H:%M")
+            )
+
+        rows = [[fin(p["start"]), f"{p['price']:.2f}"] for p in cheapest_by_time]
+        return (
+            f"# {params.count} cheapest electricity hours (next {params.within_hours} h)\n\n"
+            + md_table(["Hour (Finnish time)", "c/kWh"], rows)
+            + f"\n\nBest single hour: **{fin(best['start'])}** at {best['price']:.2f} c/kWh incl. VAT."
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+__all__ = [
+    "energy_get_spot_prices",
+    "energy_get_price_now",
+    "energy_cheapest_hours",
+    "energy_fingrid_latest",
+]

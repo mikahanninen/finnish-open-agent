@@ -60,6 +60,19 @@ Each `<BsWfs:BsWfsElement>` holds a `Time`, `ParameterName`, and `ParameterValue
 time to build rows. List all stored queries with
 `...&request=describeStoredQueries`.
 
+Air quality (note: do NOT send `&parameters=` to the air-quality queries — it returns zero
+results; fetch all and filter client-side). Use `urban::` for the Helsinki/HSY region and
+`fmi::` elsewhere:
+
+```bash
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
+&storedquery_id=urban::observations::airquality::hourly::simple&place=Helsinki'   # Helsinki region
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
+&storedquery_id=fmi::observations::airquality::hourly::simple&place=Tampere'       # elsewhere
+```
+
+`AQINDEX_PT1H_avg` is the air-quality index (1 good … 5+ very poor); PM2.5/PM10/NO2/O3 in µg/m³.
+
 ## 🚆 Transport (Fintraffic Digitraffic)
 
 Always send `-H 'Digitraffic-User: your-name/your-app'`.
@@ -86,6 +99,25 @@ Current road traffic disruption messages:
 curl -s -H 'Digitraffic-User: mika/foa' \
   'https://tie.digitraffic.fi/api/traffic-message/v1/messages?inactiveHours=0&situationType=TRAFFIC_ANNOUNCEMENT' \
   | jq '.features[].properties.announcements[0].title'
+```
+
+Road weather cameras (image = `https://weathercam.digitraffic.fi/<presetId>.jpg`):
+
+```bash
+curl -s -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weathercam/v1/stations \
+  | jq '.features[] | select(.properties.name|test("Kirkkonummi")) | {id:.properties.id, name:.properties.name}'
+```
+
+Journey planning (Digitransit) needs a free key from portal-api.digitransit.fi. Geocode, then
+POST a GraphQL `plan` query:
+
+```bash
+KEY=your-digitransit-key
+curl -s "https://api.digitransit.fi/geocoding/v1/search?text=Otaniemi&size=1" \
+  -H "digitransit-subscription-key: $KEY" | jq '.features[0].geometry.coordinates'
+curl -s -X POST https://api.digitransit.fi/routing/v2/finland/gtfs/v1 \
+  -H "digitransit-subscription-key: $KEY" -H 'Content-Type: application/json' \
+  --data '{"query":"{plan(from:{lat:60.17,lon:24.94},to:{lat:60.18,lon:24.83},numItineraries:3){itineraries{duration legs{mode route{shortName}}}}}"}'
 ```
 
 ## 🏢 Business register (PRH / YTJ)
@@ -122,20 +154,33 @@ Browse the database tree (empty path = top level; `l`=level, `t`=table):
 curl -s 'https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/' | jq '.[] | {id, text, type}'
 ```
 
-Get a table's variables, then POST a JSON query to fetch values:
+Get a table's variables (codes are dynamic per table, e.g. `alue_23_20260101`), then POST a
+selection to fetch values as json-stat2:
 
 ```bash
-curl -s 'https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/synt/statfin_synt_pxt_12dx.px' | jq '.variables[].code'
+T='https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11ra.px'
+curl -s "$T" | jq '.variables[] | {code, text, last:.values[-1]}'
+# whole-country population at end of 2025:
+curl -s -X POST "$T" -H 'Content-Type: application/json' --data '{
+  "query":[{"code":"alue_23_20260101","selection":{"filter":"item","values":["SSS"]}},
+           {"code":"contentscode","selection":{"filter":"item","values":["vaerak-vaesto"]}},
+           {"code":"timeperiod_y","selection":{"filter":"item","values":["2025"]}}],
+  "response":{"format":"json-stat2"}}' | jq '.value'
 ```
+
+Tip: default any variable you do not care about to its last value (`.values[-1]`) to keep the
+query small — that is exactly what `registers_statfin_get_table` does automatically.
 
 ## When to prefer the MCP server
 
 If `finnish_services_mcp` is connected, call its tools instead of curl — they validate inputs,
 add the identifier header, cache metadata, normalise FMI's XML, and return clean Markdown/JSON:
-`energy_get_spot_prices`, `energy_get_price_now`, `weather_get_forecast`,
-`weather_get_observations`, `transport_find_station`, `transport_get_station_trains`,
-`transport_get_traffic_messages`, `registers_search_companies`, `registers_get_company`,
-`registers_search_open_datasets`, `registers_statfin_browse`.
+`energy_get_spot_prices`, `energy_get_price_now`, `energy_cheapest_hours`,
+`energy_fingrid_latest`, `weather_get_forecast`, `weather_get_observations`,
+`weather_get_air_quality`, `transport_find_station`, `transport_get_station_trains`,
+`transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras`,
+`registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`,
+`registers_statfin_browse`, `registers_statfin_get_table`.
 
 ## Attribution
 

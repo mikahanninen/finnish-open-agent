@@ -38,8 +38,8 @@ below are grouped by domain; **bold = implemented in v0.1**, the rest are the ro
 ### 🌦️ Weather & environment
 | Service | What | API | Auth |
 | --- | --- | --- | --- |
-| **FMI open data** | Forecasts (HARMONIE), station observations, radar, warnings | WFS 2.0 XML | none |
-| HSY / air quality | Real-time air quality (Helsinki region) | WFS / REST | none |
+| **FMI open data** | Forecasts (HARMONIE), station observations, **air quality**, radar, warnings | WFS 2.0 XML | none |
+| **HSY / air quality** | Real-time air quality (Helsinki region, via FMI `urban::`) | WFS 2.0 XML | none |
 | STUK / radiation | External radiation monitoring | REST | none |
 | SYKE | Water, environment, floods | WFS/REST | none |
 
@@ -47,9 +47,9 @@ below are grouped by domain; **bold = implemented in v0.1**, the rest are the ro
 | Service | What | API | Auth |
 | --- | --- | --- | --- |
 | **Digitraffic — rail** | VR live trains, timetables, compositions, GPS | REST JSON / MQTT | none¹ |
-| **Digitraffic — road** | Traffic messages, road weather stations, cameras, TMS | REST JSON | none¹ |
+| **Digitraffic — road** | Traffic messages, **weather cameras**, road weather stations, TMS | REST JSON | none¹ |
 | Digitraffic — marine | AIS vessel positions, port calls | REST / WebSocket | none¹ |
-| Digitransit | Nationwide journey planning, stops, real-time | GraphQL | optional key |
+| **Digitransit** | Nationwide journey planning + geocoding, stops, real-time | GraphQL | free key |
 | Traficom | Vehicle & driving-licence open data | REST / files | none |
 | Fintraffic railway | Infrastructure, RINF | REST | none |
 
@@ -135,15 +135,18 @@ plans", "due-diligence a Finnish company") that compose several tools/endpoints.
 
 ## 7. Roadmap
 
-**Phase 1 (this release) — foundation & vertical slice.** Shared infra, 12 tools across the
-four domains, tests, docs, skill. ✅
+**Phase 1 — foundation & vertical slice.** Shared infra, 12 tools across the four domains,
+tests, docs, skill. ✅
 
-**Phase 2 — deepen the four domains.**
-- Transport: Digitransit GraphQL journey planning (`transport_plan_route`), road-weather
-  stations & cameras, marine AIS.
-- Weather: FMI warnings and radar; HSY air quality tool.
-- Energy: Fingrid convenience tools (production mix now, cheapest-hours planner); ENTSO-E.
-- Registers: Statistics Finland *data* fetch (PxWeb POST query builder), Suomi.fi PTV search.
+**Phase 2 — deepen the four domains.** ✅ (17 tools total)
+- Transport: Digitransit GraphQL journey planning (`transport_plan_route`) + geocoding;
+  road weather cameras (`transport_find_weather_cameras`). ✅
+- Weather: air quality (`weather_get_air_quality`) via HSY urban + national FMI networks. ✅
+- Energy: cheapest-upcoming-hours planner (`energy_cheapest_hours`). ✅
+- Registers: Statistics Finland *data* fetch (`registers_statfin_get_table`, PxWeb POST with
+  auto-default selections + json-stat2 parsing). ✅
+- Still open for a later pass: marine AIS, FMI warnings/radar, Fingrid production-mix helper,
+  ENTSO-E, Suomi.fi PTV search.
 
 **Phase 3 — civic & culture.** Eduskunta (MPs/votes), Finna cultural search, NLS geocoding.
 

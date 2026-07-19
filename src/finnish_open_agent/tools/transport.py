@@ -200,8 +200,177 @@ async def transport_get_traffic_messages(params: TrafficMessagesInput) -> str:
         return handle_error(exc)
 
 
+async def _digitransit_geocode(text: str) -> Optional[dict]:
+    """Resolve a place/address to {name, lat, lon} via Digitransit geocoding (needs key)."""
+    data = await request_json(
+        f"{config.DIGITRANSIT_GEOCODING_BASE}/search",
+        params={"text": text, "size": 1, "boundary.country": "FIN"},
+        headers={"digitransit-subscription-key": config.DIGITRANSIT_API_KEY or ""},
+    )
+    feats = data.get("features", [])
+    if not feats:
+        return None
+    lon, lat = feats[0]["geometry"]["coordinates"]
+    return {"name": feats[0]["properties"].get("label", text), "lat": lat, "lon": lon}
+
+
+_PLAN_QUERY = """
+query Plan($fromLat: Float!, $fromLon: Float!, $toLat: Float!, $toLon: Float!, $n: Int!) {
+  plan(from: {lat: $fromLat, lon: $fromLon}, to: {lat: $toLat, lon: $toLon}, numItineraries: $n) {
+    itineraries {
+      duration
+      startTime
+      endTime
+      walkDistance
+      legs {
+        mode
+        duration
+        from { name }
+        to { name }
+        route { shortName }
+      }
+    }
+  }
+}
+"""
+
+
+class PlanRouteInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    from_place: str = Field(..., description="Origin address or place, e.g. 'Helsinki railway station'.")
+    to_place: str = Field(..., description="Destination address or place, e.g. 'Espoo, Otaniemi'.")
+    itineraries: int = Field(default=3, ge=1, le=5, description="Number of route options.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_plan_route", annotations={"title": "Plan public-transport route", **_RO})
+async def transport_plan_route(params: PlanRouteInput) -> str:
+    """Plan a public-transport journey between two Finnish places (Digitransit / HSL nationwide).
+
+    Geocodes both endpoints, then returns itineraries with legs (walk, bus, tram, train,
+    metro, ferry) including departure/arrival times and line numbers.
+
+    Requires a Digitransit subscription key in DIGITRANSIT_API_KEY (free at
+    portal-api.digitransit.fi). Without it, returns an actionable error.
+
+    Args:
+        params (PlanRouteInput): from_place (str), to_place (str), itineraries (int 1-5),
+            response_format ('markdown'|'json').
+
+    Returns:
+        str: For each itinerary: total duration, start/end (Finnish local time) and a
+        leg-by-leg summary. On failure "Error: ...".
+    """
+    from datetime import datetime, timezone
+    from zoneinfo import ZoneInfo
+
+    if not config.DIGITRANSIT_API_KEY:
+        return (
+            "Error: Route planning needs a free Digitransit subscription key. Register at "
+            "https://portal-api.digitransit.fi/ and set the DIGITRANSIT_API_KEY environment variable."
+        )
+    try:
+        origin = await _digitransit_geocode(params.from_place)
+        dest = await _digitransit_geocode(params.to_place)
+        if origin is None or dest is None:
+            miss = params.from_place if origin is None else params.to_place
+            return f"Could not locate '{miss}'. Try a more specific address."
+        data = await request_json(
+            config.DIGITRANSIT_ROUTING_BASE,
+            method="POST",
+            headers={"digitransit-subscription-key": config.DIGITRANSIT_API_KEY,
+                     "Content-Type": "application/json"},
+            json_body={
+                "query": _PLAN_QUERY,
+                "variables": {
+                    "fromLat": origin["lat"], "fromLon": origin["lon"],
+                    "toLat": dest["lat"], "toLon": dest["lon"], "n": params.itineraries,
+                },
+            },
+            cache=False,
+        )
+        itins = (((data.get("data") or {}).get("plan") or {}).get("itineraries")) or []
+        if not itins:
+            return f"No routes found from {origin['name']} to {dest['name']}."
+
+        def fin(ms: int) -> str:
+            return datetime.fromtimestamp(ms / 1000, timezone.utc).astimezone(
+                ZoneInfo("Europe/Helsinki")
+            ).strftime("%H:%M")
+
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"from": origin["name"], "to": dest["name"], "itineraries": itins})
+        lines = [f"# {origin['name']} → {dest['name']}", ""]
+        for i, it in enumerate(itins, 1):
+            mins = round(it["duration"] / 60)
+            legs = []
+            for leg in it["legs"]:
+                line = (leg.get("route") or {}).get("shortName")
+                legs.append(f"{leg['mode'].lower()}" + (f" {line}" if line else ""))
+            lines.append(
+                f"**Option {i}** — {mins} min, {fin(it['startTime'])}→{fin(it['endTime'])}: "
+                + " › ".join(legs)
+            )
+        return "\n".join(lines)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+class WeatherCamsInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    query: str = Field(..., description="Text to match in a camera station name, e.g. 'Kirkkonummi' or 'vt1'.")
+    limit: int = Field(default=10, ge=1, le=50)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_find_weather_cameras", annotations={"title": "Find road weather cameras", **_RO})
+async def transport_find_weather_cameras(params: WeatherCamsInput) -> str:
+    """Find Finnish road weather-camera stations by name (Fintraffic Digitraffic).
+
+    Args:
+        params (WeatherCamsInput): query (str), limit (int 1-50), response_format.
+
+    Returns:
+        str: Matching camera stations with id, name, coordinates and number of camera
+        presets (image angles). Image URLs follow https://weathercam.digitraffic.fi/<presetId>.jpg.
+        On failure "Error: ...".
+    """
+    try:
+        data = await request_json(f"{config.DIGITRAFFIC_ROAD_BASE}/weathercam/v1/stations")
+        ql = params.query.strip().lower()
+        matches = []
+        for f in data.get("features", []):
+            props = f.get("properties", {})
+            name = props.get("name", "") or props.get("id", "")
+            if ql in name.lower() or ql == props.get("id", "").lower():
+                coords = f.get("geometry", {}).get("coordinates", [None, None])
+                matches.append(
+                    {
+                        "id": props.get("id", ""),
+                        "name": name,
+                        "lon": coords[0],
+                        "lat": coords[1],
+                        "cameras": len(props.get("presets", []) or props.get("cameraPresets", [])),
+                    }
+                )
+            if len(matches) >= params.limit:
+                break
+        if not matches:
+            return f"No weather cameras found matching '{params.query}'."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"count": len(matches), "cameras": matches})
+        rows = [[m["id"], m["name"], f"{m['lat']}, {m['lon']}", m["cameras"]] for m in matches]
+        return "# Road weather cameras\n\n" + md_table(
+            ["ID", "Name", "Lat, Lon", "Angles"], rows
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "transport_find_station",
     "transport_get_station_trains",
     "transport_get_traffic_messages",
+    "transport_plan_route",
+    "transport_find_weather_cameras",
 ]

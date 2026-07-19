@@ -10,17 +10,20 @@ complementary things:
 
 Most services need **no API key**. Everything here is public, open data.
 
-## Domains in v0.1
+## Domains (v0.2 — 17 tools)
 
-| Domain | Source | Example tools |
+| Domain | Source | Tools |
 | --- | --- | --- |
-| ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | `energy_get_spot_prices`, `energy_get_price_now`, `energy_fingrid_latest` |
-| 🌦️ Weather | Finnish Meteorological Institute (FMI) | `weather_get_forecast`, `weather_get_observations` |
-| 🚆 Transport | Fintraffic Digitraffic (road + rail) | `transport_find_station`, `transport_get_station_trains`, `transport_get_traffic_messages` |
-| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland | `registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`, `registers_statfin_browse` |
+| ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | `energy_get_spot_prices`, `energy_get_price_now`, `energy_cheapest_hours`, `energy_fingrid_latest` |
+| 🌦️ Weather | Finnish Meteorological Institute (FMI), HSY | `weather_get_forecast`, `weather_get_observations`, `weather_get_air_quality` |
+| 🚆 Transport | Fintraffic Digitraffic, Digitransit | `transport_find_station`, `transport_get_station_trains`, `transport_get_traffic_messages`, `transport_plan_route`, `transport_find_weather_cameras` |
+| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland | `registers_search_companies`, `registers_get_company`, `registers_search_open_datasets`, `registers_statfin_browse`, `registers_statfin_get_table` |
 
-See [`PLAN.md`](./PLAN.md) for the full architecture and the roadmap of additional
-services (Digitransit journey planning, Suomi.fi PTV, Eduskunta, Finna, and more).
+Two tools need a free key (see Configuration): `transport_plan_route` (Digitransit) and
+`energy_fingrid_latest` (Fingrid). Everything else is key-less.
+
+See [`PLAN.md`](./PLAN.md) for the full architecture and roadmap (Suomi.fi PTV, Eduskunta,
+Finna, NLS geocoding, and more).
 
 ## Quick start
 
@@ -52,11 +55,11 @@ Add to your MCP config (e.g. `claude_desktop_config.json`):
 
 Then ask things like:
 
-- "What's the cheapest hour for electricity in Finland today?"
-- "Give me the 12-hour weather forecast for Rovaniemi."
-- "When do the next trains leave Tampere?"
+- "What are the 3 cheapest hours for electricity in Finland tonight?"
+- "Give me the 12-hour weather forecast for Rovaniemi, and the air quality in Helsinki."
+- "When do the next trains leave Tampere, and plan me a route from Helsinki to Otaniemi."
 - "Look up the company Supercell and its Business ID."
-- "What open datasets exist about air quality in Finland?"
+- "What was Finland's population at the end of 2025?" (Statistics Finland)
 
 ## Configuration
 
@@ -68,7 +71,7 @@ All configuration is via environment variables (see [`.env.example`](./.env.exam
 | `FOA_HTTP_TIMEOUT` | `30` | Per-request timeout (seconds) |
 | `FOA_CACHE_TTL` | `120` | In-process cache TTL for slow-moving metadata (seconds; 0 disables) |
 | `FINGRID_API_KEY` | — | Free key from data.fingrid.fi (only needed for `energy_fingrid_latest`) |
-| `DIGITRANSIT_API_KEY` | — | Optional Digitransit key for higher rate limits (roadmap) |
+| `DIGITRANSIT_API_KEY` | — | Free key from portal-api.digitransit.fi (needed for `transport_plan_route`) |
 | `FOA_TRANSPORT` | `stdio` | `stdio` (local) or `http` (remote streamable HTTP) |
 | `FOA_HOST` / `FOA_PORT` | `127.0.0.1` / `8000` | Bind address for HTTP transport |
 

@@ -225,9 +225,99 @@ async def registers_statfin_browse(params: StatFinBrowseInput) -> str:
         return handle_error(exc)
 
 
+def _labels_in_order(category: dict) -> list[tuple[str, str]]:
+    """Return [(code, label)] for a json-stat2 category, ordered by its index positions."""
+    index = category.get("index", {})
+    labels = category.get("label", {})
+    if isinstance(index, list):  # index can be a plain ordered list of codes
+        return [(code, labels.get(code, code)) for code in index]
+    ordered = sorted(index.items(), key=lambda kv: kv[1])  # {code: position}
+    return [(code, labels.get(code, code)) for code, _ in ordered]
+
+
+def _parse_jsonstat2(res: dict, max_cells: int) -> tuple[str, list[str], list[list[str]]]:
+    """Flatten a json-stat2 response into (title, column_headers, rows)."""
+    order = res["id"]
+    sizes = res["size"]
+    dims = res["dimension"]
+    values = res["value"]
+    per_dim = [_labels_in_order(dims[code]["category"]) for code in order]
+    headers = [dims[code].get("label", code) for code in order] + ["value"]
+    rows: list[list[str]] = []
+    for i, val in enumerate(values):
+        if i >= max_cells:
+            break
+        idx = i
+        coord = []
+        for j in range(len(sizes) - 1, -1, -1):
+            pos = idx % sizes[j]
+            idx //= sizes[j]
+            coord.insert(0, per_dim[j][pos][1])
+        rows.append(coord + ["" if val is None else str(val)])
+    return res.get("label", "StatFin table"), headers, rows
+
+
+class StatFinGetTableInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    table_path: str = Field(
+        ...,
+        description="PxWeb table path under StatFin, e.g. 'vaerak/11ra.px' "
+        "(discover ids with registers_statfin_browse).",
+    )
+    selections: dict[str, list[str]] | None = Field(
+        default=None,
+        description="Optional {variable_code: [value_codes]} to select. Any variable you omit "
+        "defaults to its most recent/last value. Get codes from registers_statfin_browse on the table.",
+    )
+    max_cells: int = Field(default=50, ge=1, le=500, description="Max data cells to return.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="registers_statfin_get_table", annotations={"title": "Get Statistics Finland data", **_RO})
+async def registers_statfin_get_table(params: StatFinGetTableInput) -> str:
+    """Fetch actual statistical values from a Statistics Finland (StatFin) PxWeb table.
+
+    Reads the table's metadata, builds a PxWeb query (defaulting any unspecified variable to
+    its most recent value), and returns the resulting figures. Pair with
+    registers_statfin_browse to discover table paths and variable/value codes.
+
+    Args:
+        params (StatFinGetTableInput): table_path (str, e.g. 'vaerak/11ra.px'),
+            selections (optional {var_code: [value_codes]}), max_cells (int), response_format.
+
+    Returns:
+        str: Markdown table of dimension labels + value, or JSON
+        {"title", "columns", "rows"}. On failure "Error: ...".
+    """
+    try:
+        url = f"{config.STATFIN_PXWEB_BASE}/StatFin/{params.table_path.strip('/')}"
+        meta = await request_json(url)
+        variables = meta.get("variables", [])
+        if not variables:
+            return f"No such StatFin table '{params.table_path}'. Use registers_statfin_browse to find it."
+        sel = params.selections or {}
+        query = []
+        for v in variables:
+            code = v["code"]
+            values = sel.get(code) or [v["values"][-1]]  # default: most recent/last value
+            query.append({"code": code, "selection": {"filter": "item", "values": values}})
+        res = await request_json(
+            url, method="POST",
+            json_body={"query": query, "response": {"format": "json-stat2"}},
+            headers={"Content-Type": "application/json"}, cache=False,
+        )
+        title, headers, rows = _parse_jsonstat2(res, params.max_cells)
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"title": title, "columns": headers, "rows": rows})
+        return f"# {title}\n\n" + md_table(headers, rows)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "registers_search_companies",
     "registers_get_company",
     "registers_search_open_datasets",
     "registers_statfin_browse",
+    "registers_statfin_get_table",
 ]

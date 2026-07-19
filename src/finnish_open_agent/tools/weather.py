@@ -66,19 +66,25 @@ def _parse_simple_features(xml_text: str) -> list[dict]:
     return rows
 
 
-async def _fmi_query(stored_query: str, place: str, parameters: str, hours: int) -> list[dict]:
-    text = await request_text(
-        config.FMI_WFS_BASE,
-        params={
-            "service": "WFS",
-            "version": "2.0.0",
-            "request": "getFeature",
-            "storedquery_id": stored_query,
-            "place": place,
-            "parameters": parameters,
-            "timestep": "60",
-        },
-    )
+async def _fmi_query(
+    stored_query: str, place: str, parameters: str, hours: int, send_parameters: bool = True
+) -> list[dict]:
+    """Query an FMI simple-feature stored query and return parsed rows.
+
+    Some stored queries (e.g. air quality) return nothing when a ``parameters`` filter is
+    sent; for those pass ``send_parameters=False`` and filter columns client-side.
+    """
+    query: dict[str, str] = {
+        "service": "WFS",
+        "version": "2.0.0",
+        "request": "getFeature",
+        "storedquery_id": stored_query,
+        "place": place,
+        "timestep": "60",
+    }
+    if send_parameters:
+        query["parameters"] = parameters
+    text = await request_text(config.FMI_WFS_BASE, params=query)
     rows = _parse_simple_features(text)
     return rows[: hours * max(1, len(parameters.split(",")))]  # trim generously; dedup below
 
@@ -200,4 +206,86 @@ async def weather_get_observations(params: ObservationInput) -> str:
         return handle_error(exc)
 
 
-__all__ = ["weather_get_forecast", "weather_get_observations"]
+AIR_QUALITY_DEFAULT = "AQINDEX_PT1H_avg,PM25_PT1H_avg,PM10_PT1H_avg,NO2_PT1H_avg,O3_PT1H_avg"
+
+
+class AirQualityInput(BaseModel):
+    """Input for FMI air-quality observations."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    place: str = Field(..., description="Finnish place name, e.g. 'Helsinki'.", min_length=1)
+    hours: int = Field(default=6, ge=1, le=48, description="How many past hours to include.")
+    parameters: str = Field(
+        default=AIR_QUALITY_DEFAULT,
+        description="FMI air-quality parameters. AQINDEX_PT1H_avg=air-quality index, "
+        "PM25/PM10=particulates µg/m³, NO2/O3/SO2/CO=gases.",
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="weather_get_air_quality", annotations={"title": "FMI air quality", **_RO})
+async def weather_get_air_quality(params: AirQualityInput) -> str:
+    """Get recent air-quality observations for a Finnish location from FMI.
+
+    The air-quality index (AQINDEX_PT1H_avg) is roughly: 1 good, 2 satisfactory, 3 fair,
+    4 poor, 5+ very poor. Particulates (PM2.5/PM10) and gases are in µg/m³.
+
+    Args:
+        params (AirQualityInput): place (str), hours (int 1-48),
+            parameters (comma list; default index/PM2.5/PM10/NO2/O3), response_format.
+
+    Returns:
+        str: Markdown table or JSON of {"time", <param>...} rows, oldest first.
+        On failure "Error: ...". If a station has no readings, suggests a larger city.
+    """
+    try:
+        cols = params.parameters.split(",")
+
+        async def fetch(stored_query: str) -> list[dict]:
+            # The air-quality queries return nothing if a `parameters` filter is sent, so we
+            # fetch all parameters and select requested columns client-side. Merge by time
+            # without overwriting a real value with a NaN (place may span several stations).
+            text = await request_text(
+                config.FMI_WFS_BASE,
+                params={
+                    "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                    "storedquery_id": stored_query, "place": params.place, "timestep": "60",
+                },
+            )
+            merged: dict[str, dict] = {}
+            for r in _parse_simple_features(text):
+                slot = merged.setdefault(r["time"], {"time": r["time"]})
+                for k, v in r.items():
+                    if k == "time":
+                        continue
+                    if v is not None or k not in slot:
+                        slot[k] = v
+            # Keep only timestamps that actually have a requested value.
+            return [row for row in merged.values() if any(row.get(c) is not None for c in cols)]
+
+        # HSY urban network (covers Helsinki region) first, then the national FMI network.
+        rows = await fetch("urban::observations::airquality::hourly::simple")
+        if not rows:
+            rows = await fetch("fmi::observations::airquality::hourly::simple")
+        result = sorted(rows, key=lambda r: r["time"])[-params.hours :]
+        if not result:
+            return (
+                f"No recent air-quality readings for '{params.place}'. Try a city with a "
+                "monitoring station (e.g. Helsinki, Tampere, Turku, Oulu)."
+            )
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"place": params.place, "rows": result})
+        cols = params.parameters.split(",")
+        header = "| Time (UTC) | " + " | ".join(cols) + " |"
+        sep = "| --- | " + " | ".join(["---"] * len(cols)) + " |"
+        lines = [f"# FMI air quality near {params.place}", "", header, sep]
+        for r in result:
+            vals = [("" if r.get(c) is None else str(r.get(c))) for c in cols]
+            lines.append(f"| {r['time']} | " + " | ".join(vals) + " |")
+        return "\n".join(lines)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+__all__ = ["weather_get_forecast", "weather_get_observations", "weather_get_air_quality"]

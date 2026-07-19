@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from finnish_open_agent.tools.common import md_table
-from finnish_open_agent.tools.registers import _current_name
+from finnish_open_agent.tools.registers import _current_name, _parse_jsonstat2
 from finnish_open_agent.tools.weather import _parse_simple_features
 
 SAMPLE_FMI = """<?xml version="1.0" encoding="UTF-8"?>
@@ -58,6 +58,40 @@ def test_current_name_prefers_active_primary():
         ]
     }
     assert _current_name(company) == "New Name Oy"
+
+
+def test_parse_jsonstat2_flattens_row_major():
+    # 2 areas x 2 years, value array row-major over [Area, Year].
+    res = {
+        "label": "Demo table",
+        "id": ["Area", "Year"],
+        "size": [2, 2],
+        "dimension": {
+            "Area": {"label": "Area", "category": {
+                "index": {"FI": 0, "SE": 1}, "label": {"FI": "Finland", "SE": "Sweden"}}},
+            "Year": {"label": "Year", "category": {
+                "index": {"2024": 0, "2025": 1}, "label": {"2024": "2024", "2025": "2025"}}},
+        },
+        "value": [10, 11, 20, 21],
+    }
+    title, headers, rows = _parse_jsonstat2(res, max_cells=50)
+    assert title == "Demo table"
+    assert headers == ["Area", "Year", "value"]
+    assert rows[0] == ["Finland", "2024", "10"]
+    assert rows[1] == ["Finland", "2025", "11"]
+    assert rows[2] == ["Sweden", "2024", "20"]
+    assert rows[3] == ["Sweden", "2025", "21"]
+
+
+def test_parse_jsonstat2_respects_max_cells():
+    res = {
+        "label": "t", "id": ["X"], "size": [3],
+        "dimension": {"X": {"label": "X", "category": {
+            "index": {"a": 0, "b": 1, "c": 2}, "label": {"a": "a", "b": "b", "c": "c"}}}},
+        "value": [1, 2, 3],
+    }
+    _, _, rows = _parse_jsonstat2(res, max_cells=2)
+    assert len(rows) == 2
 
 
 def test_md_table_shape():
