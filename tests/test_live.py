@@ -136,3 +136,15 @@ async def test_solar_live():
 
     out = await weather.weather_get_solar(SolarInput(place="Helsinki", hours=2))
     assert "solar" in out.lower() and "Error" not in out
+
+
+async def test_lightning_live():
+    out = await weather.weather_get_lightning()
+    assert "Lightning" in out and "Error" not in out
+
+
+async def test_finna_record_live():
+    from finnish_open_agent.tools.culture import RecordInput
+
+    out = await culture.culture_get_record(RecordInput(record_id="eepos.136605"))
+    assert "finna.fi/Record" in out and "Error" not in out

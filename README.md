@@ -14,18 +14,18 @@ portable, and agent-friendly — one codebase, three ways to use it:
 Every tool is available in all three modes automatically. Most services need **no API key** —
 everything here is public, open data.
 
-## Domains (v0.8 — 34 tools)
+## Domains (v0.9 — 36 tools)
 
 Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
 | Domain | Source | Tools |
 | --- | --- | --- |
 | ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | spot prices, price now, cheapest hours, Fingrid data |
-| 🌦️ Weather | FMI, HSY, STUK | forecast, observations, air quality, sea level & waves, solar radiation, national radiation (STUK) |
+| 🌦️ Weather | FMI, HSY, STUK | forecast, observations, air quality, sea level & waves, solar radiation, national radiation (STUK), lightning |
 | 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, road maintenance, ships (AIS), port calls, journey routing |
 | 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search & detail, StatFin browse & data, public-service search & detail |
 | 🏛️ Civic | Eduskunta (Parliament) | MP search, seat composition, recent votes, vote breakdowns |
-| 🎭 Culture | Finna | cultural-heritage search |
+| 🎭 Culture | Finna | cultural-heritage search & record detail |
 | 🗺️ Places | National Land Survey (MML) | geocoding |
 | 📚 Library | Kirjastot.fi | public library search & opening hours |
 

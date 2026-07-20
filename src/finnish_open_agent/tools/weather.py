@@ -420,6 +420,37 @@ async def weather_get_radiation() -> str:
         return handle_error(exc)
 
 
+@mcp.tool(name="weather_get_lightning", annotations={"title": "Lightning activity (FMI)", **_RO})
+async def weather_get_lightning() -> str:
+    """Get current lightning-strike activity over Finland and the Baltic from FMI.
+
+    Reports how many lightning strikes were detected in the latest observation window and the
+    range of peak currents (kA). In calm weather this is legitimately zero.
+
+    Returns:
+        str: Strike count and peak-current range (absolute kA). On failure "Error: ...".
+    """
+    try:
+        text = await request_text(
+            config.FMI_WFS_BASE,
+            params={
+                "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                "storedquery_id": "fmi::observations::lightning::simple",
+            },
+        )
+        peaks = _extract_values(text, "peak_current")
+        if not peaks:
+            return "# Lightning in Finland\n\nNo lightning strikes detected in the latest window."
+        abs_peaks = [abs(p) for p in peaks]
+        return (
+            "# Lightning in Finland\n\n"
+            f"- **Strikes detected (latest window):** {len(peaks)}\n"
+            f"- **Peak current:** {min(abs_peaks):.0f} – {max(abs_peaks):.0f} kA\n"
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 class SolarInput(BaseModel):
     """Input for FMI solar-radiation observations."""
 
@@ -486,4 +517,5 @@ __all__ = [
     "weather_get_sea",
     "weather_get_radiation",
     "weather_get_solar",
+    "weather_get_lightning",
 ]

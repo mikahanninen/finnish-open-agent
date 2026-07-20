@@ -2,7 +2,7 @@
 
 > Auto-generated from the live MCP server by `scripts/render_tools.py`. **Do not edit by hand.**
 
-**34 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
+**36 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
 
 ## ⚡ Energy
 
@@ -61,6 +61,10 @@ Get an hourly HARMONIE weather forecast for a Finnish location from FMI.
 | `hours` | no | Number of forecast hours (1-60). |
 | `parameters` | no | Comma-separated FMI forecast parameters (e.g. 'Temperature,WindSpeedMS'). |
 | `response_format` | no |  |
+
+### `weather_get_lightning`
+
+Get current lightning-strike activity over Finland and the Baltic from FMI.
 
 ### `weather_get_observations`
 
@@ -310,6 +314,15 @@ Search current Finnish Members of Parliament (Eduskunta) by name and/or party.
 | `response_format` | no |  |
 
 ## 🎭 Culture
+
+### `culture_get_record`
+
+Get full details of a single Finna cultural-heritage record by its id.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `record_id` | yes | Finna record id from culture_search, e.g. 'eepos.136605'. |
+| `response_format` | no |  |
 
 ### `culture_search`
 
