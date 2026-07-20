@@ -171,8 +171,9 @@ the 11 skills into your agent with the [`skills` CLI](https://github.com/vercel-
 (supports Claude Code, Cursor, Codex, and 70+ others):
 
 ```bash
-npx skills add mikahanninen/finnish-open-agent          # all 11 skills
-npx skills add mikahanninen/finnish-open-agent -s finnish-weather,finnish-transport
+npx skills add mikahanninen/finnish-open-agent                    # all 11 skills
+npx skills add mikahanninen/finnish-open-agent -s finnish-weather # just one
+npx skills add mikahanninen/finnish-open-agent -s finnish-weather,finnish-transport # a few
 ```
 
 Or drop a skill folder into your agent's skills directory by hand (e.g. `~/.claude/skills/`).

@@ -147,6 +147,8 @@ body { margin: 0; text-wrap: pretty; }
 .skills { padding: calc(2.5 * var(--leading)) 0 calc(3 * var(--leading)); }
 .skills-install { font-size: 15.5px; line-height: var(--leading); margin: 0;
   color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.skills-install-sub { font-size: 13.5px; margin-top: calc(var(--half) - 4px);
+  color: color-mix(in srgb, var(--color-text) 60%, transparent); }
 .skills-install code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.92em; color: var(--color-text);
   background: color-mix(in srgb, var(--color-text) 8%, transparent);
@@ -327,6 +329,7 @@ body[data-baselines]::after {
   <section class="skills" id="skills">
     <span class="kicker" data-i18n="skills.kicker">Mitä repo sisältää</span>
     <p class="skills-install" data-i18n="skills.install">Asenna omaan agenttiin: <code>npx skills add mikahanninen/finnish-open-agent</code></p>
+    <p class="skills-install skills-install-sub" data-i18n="skills.installOne">Vain yksi taito: <code>npx skills add mikahanninen/finnish-open-agent -s finnish-weather</code></p>
     <table class="table">
       <thead>
         <tr>
@@ -410,6 +413,7 @@ body[data-baselines]::after {
     'feat.4c': 'The agent landscape turns over weekly. Entries are dated, revisited, and quietly retired when they stop being the answer — so the list stays short enough to trust.',
     'skills.kicker': "What's in the repo",
     'skills.install': 'Install into your own agent: <code>npx skills add mikahanninen/finnish-open-agent</code>',
+    'skills.installOne': 'Just one skill: <code>npx skills add mikahanninen/finnish-open-agent -s finnish-weather</code>',
     'skills.th1': 'Skill', 'skills.th2': 'Covers', 'skills.th3': 'Tools',
     'skills.weather': 'FMI: forecasts, station observations, air quality, lightning, radiation, sea level & waves',
     'skills.transport': 'VR trains & stations, road-traffic disruptions, weather cameras, road condition & maintenance, ships (AIS), port calls, journey routing',
