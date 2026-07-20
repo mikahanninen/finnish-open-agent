@@ -49,9 +49,11 @@ body { margin: 0; text-wrap: pretty; }
 .nav a { white-space: nowrap; }
 .nav a[aria-current='location'] { color: var(--color-accent); } /* in-page anchor, not
    a page link — 'location' is the truthful value; carry the component's active ink */
-@media (max-width: 480px) { .nav a { display: none; } } /* phone width: the nav
-   keeps brand + the one action (layout-only — the component's look is
-   untouched); the full link row's min-content crosses narrow-phone widths */
+@media (max-width: 720px) { .nav a[href^='#'] { display: none; } } /* tablet & below: the nav
+   keeps brand + language + the one action (layout-only — the component's look is
+   untouched); the full in-page link row's min-content crosses these widths */
+@media (max-width: 380px) { .nav { gap: var(--space-3); } } /* smallest phones: tighten
+   the gap so brand + flags + action never force a horizontal scroll */
 
 /* — drawn structure: the 2px rule is the section seam (the deck's header
    band as page grammar; rules span the content column, solid — this system
@@ -219,13 +221,19 @@ footer { padding: calc(2 * var(--leading)) 0; font-size: 13px; line-height: var(
 @media (max-width: 880px) {
   .feature { grid-template-columns: 1fr; gap: var(--half); }
   .f-copy { max-width: var(--measure); }
+  /* the four stat cells crowd once the longer Finnish labels meet the tablet
+     band — drop to two columns alongside the feature collapse */
+  .stats .grid { grid-template-columns: repeat(2, 1fr); justify-content: start; column-gap: clamp(24px, 6vw, 72px); }
 }
 @media (max-width: 720px) {
   .hero { padding-top: calc(2.5 * var(--leading)); }
-  .stats .grid { grid-template-columns: repeat(2, 1fr); justify-content: start; }
   .split { grid-template-columns: 1fr; }
   .split-figure { order: -1; }
   .skills .table th:nth-child(3), .skills .table td:nth-child(3) { display: none; } /* drop the tool-count column first */
+}
+@media (max-width: 400px) {
+  /* single column on the smallest phones so the numerals never truncate */
+  .stats .grid { grid-template-columns: 1fr; }
 }
 
 /* Review aid: the 28px rhythm drawn as hairlines — debug chrome, toggled by
