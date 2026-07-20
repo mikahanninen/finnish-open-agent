@@ -45,7 +45,7 @@ body { margin: 0; text-wrap: pretty; }
 /* the component demo pads the masthead with its own spacing; on the page the
    masthead's contents take the page gutter and sit on the wrap's text axis
    (padding-only — full-width paint such as a masthead rule is untouched) */
-.nav { padding-inline: max(var(--edge), calc((100% - 1200px) / 2 + var(--edge))); }
+.nav { padding-inline: max(var(--edge), calc((100% - 1200px) / 2 + var(--edge))); flex-wrap: wrap; row-gap: var(--half); }
 .nav a { white-space: nowrap; }
 .nav a[aria-current='location'] { color: var(--color-accent); } /* in-page anchor, not
    a page link — 'location' is the truthful value; carry the component's active ink */
@@ -138,6 +138,18 @@ body { margin: 0; text-wrap: pretty; }
   color: color-mix(in srgb, var(--color-text) 78%, transparent);
   max-width: 52ch; text-box: trim-both cap alphabetic; }
 
+/* — skills table (drawn structure, same grammar as .table in the DS: 2px
+   rule under the head, 1px seams between rows — a directory, not cards) — */
+.skills { padding: calc(2.5 * var(--leading)) 0 calc(3 * var(--leading)); }
+.skills .table { margin-top: calc(var(--leading) - var(--half)); table-layout: fixed; }
+.skills .table th:first-child, .skills .table td:first-child { padding-left: 0; width: 30%; }
+.skills .table th:last-child, .skills .table td:last-child { padding-right: 0; width: 64px; }
+.skill-name { font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 14.5px; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.skill-name::before { content: ""; display: inline-block; width: 7px; height: 7px;
+  margin-right: 10px; background: var(--color-accent); vertical-align: 2px; } /* the deck's red square mark */
+.skill-desc { color: color-mix(in srgb, var(--color-text) 78%, transparent); overflow-wrap: anywhere; }
+
 /* — imagery split (grayscale photograph — the system prints in black and
    white; the box pins the bundled asset's 951×665 ratio so swaps
    cover-crop into the same frame) — */
@@ -212,6 +224,7 @@ footer { padding: calc(2 * var(--leading)) 0; font-size: 13px; line-height: var(
   .stats .grid { grid-template-columns: repeat(2, 1fr); justify-content: start; }
   .split { grid-template-columns: 1fr; }
   .split-figure { order: -1; }
+  .skills .table th:nth-child(3), .skills .table td:nth-child(3) { display: none; } /* drop the tool-count column first */
 }
 
 /* Review aid: the 28px rhythm drawn as hairlines — debug chrome, toggled by
@@ -235,6 +248,7 @@ body[data-baselines]::after {
   <span class="nav-brand">Open Agent</span>
   <a href="#index" aria-current="location" data-i18n="nav.index">Hakemisto</a>
   <a href="#inside" data-i18n="nav.inside">Sisältö</a>
+  <a href="#skills" data-i18n="nav.skills">Taidot</a>
   <a href="#contribute" data-i18n="nav.contribute">Osallistu</a>
   <span class="lang" role="group" aria-label="Kieli / Language">
     <button type="button" class="lang-btn" data-lang="fi" aria-pressed="true">
@@ -292,6 +306,34 @@ body[data-baselines]::after {
     </div>
   </section>
 
+  <hr class="rule2" />
+
+  <section class="skills" id="skills">
+    <span class="kicker" data-i18n="skills.kicker">Mitä repo sisältää</span>
+    <table class="table">
+      <thead>
+        <tr>
+          <th data-i18n="skills.th1">Taito</th>
+          <th data-i18n="skills.th2">Kattaa</th>
+          <th data-i18n="skills.th3">Työkaluja</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="skill-name">finnish-weather</td><td class="skill-desc" data-i18n="skills.weather">FMI: sääennusteet, säähavainnot, ilmanlaatu, salamahavainnot, säteily, meriveden korkeus ja aallokko</td><td>8</td></tr>
+        <tr><td class="skill-name">finnish-transport</td><td class="skill-desc" data-i18n="skills.transport">VR-junat ja asemat, tieliikenteen häiriöt, kelikamerat, tien kunto ja kunnossapito, laivat (AIS), satamakäynnit, reittihaku</td><td>9</td></tr>
+        <tr><td class="skill-name">finnish-registers</td><td class="skill-desc" data-i18n="skills.registers">PRH/YTJ-yritysrekisteri, avoindata.fi-tietoaineistot, Tilastokeskuksen StatFin-taulukot, Suomi.fi-palveluhakemisto</td><td>8</td></tr>
+        <tr><td class="skill-name">finnish-energy</td><td class="skill-desc" data-i18n="skills.energy">Pörssisähkön tuntihinnat, hinta juuri nyt, halvimmat tunnit, Fingridin kantaverkkodata</td><td>4</td></tr>
+        <tr><td class="skill-name">finnish-civic</td><td class="skill-desc" data-i18n="skills.civic">Eduskunta: kansanedustajahaku, puolueiden paikkajako, äänestykset ja niiden puoluekohtainen jakauma</td><td>4</td></tr>
+        <tr><td class="skill-name">finnish-culture</td><td class="skill-desc" data-i18n="skills.culture">Finna: kirjastojen, museoiden ja arkistojen aineistohaku ja tietuenäkymä</td><td>2</td></tr>
+        <tr><td class="skill-name">finnish-health</td><td class="skill-desc" data-i18n="skills.health">THL Sotkanet: terveys- ja hyvinvointi-indikaattoreiden haku ja arvot alueittain</td><td>2</td></tr>
+        <tr><td class="skill-name">finnish-places</td><td class="skill-desc" data-i18n="skills.places">Maanmittauslaitos: osoitteiden ja paikannimien geokoodaus koordinaateiksi</td><td>1</td></tr>
+        <tr><td class="skill-name">finnish-events</td><td class="skill-desc" data-i18n="skills.events">LinkedEvents: konsertit, näyttelyt ja muut tapahtumat Suomessa</td><td>1</td></tr>
+        <tr><td class="skill-name">finnish-library</td><td class="skill-desc" data-i18n="skills.library">Kirjastot.fi: kirjastojen sijainnit ja aukioloajat</td><td>1</td></tr>
+        <tr><td class="skill-name">finnish-open-data</td><td class="skill-desc" data-i18n="skills.opendata">Kattoartikkeli, joka ohjaa oikean taidon luo yleisissä "avoin data" -kysymyksissä</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
   <section class="split" id="contribute">
     <div class="split-copy">
       <span class="kicker" data-i18n="split.kicker">Osallistu</span>
@@ -331,7 +373,7 @@ body[data-baselines]::after {
 // only English needs listing. Choice persists in localStorage.
 (() => {
   const EN = {
-    'nav.index': 'The index', 'nav.inside': 'Inside', 'nav.contribute': 'Contribute',
+    'nav.index': 'The index', 'nav.inside': 'Inside', 'nav.skills': 'Skills', 'nav.contribute': 'Contribute',
     'nav.github': 'Browse on GitHub',
     'hero.h1': '<span class="line">Agentic knowledge,</span> <span class="line">curated in the open.</span>',
     'hero.sub': 'Finnish Open Agent is a community-maintained index of the open-source agent landscape — the frameworks, research, tooling and patterns worth knowing, read by humans and organized so you can find what works without wading through the noise.',
@@ -349,6 +391,19 @@ body[data-baselines]::after {
     'feat.3c': "Grouped by what you're trying to do — build an agent, evaluate one, or understand the research underneath. Find the shortest path from a question to something you can run.",
     'feat.4t': 'Kept current',
     'feat.4c': 'The agent landscape turns over weekly. Entries are dated, revisited, and quietly retired when they stop being the answer — so the list stays short enough to trust.',
+    'skills.kicker': "What's in the repo",
+    'skills.th1': 'Skill', 'skills.th2': 'Covers', 'skills.th3': 'Tools',
+    'skills.weather': 'FMI: forecasts, station observations, air quality, lightning, radiation, sea level & waves',
+    'skills.transport': 'VR trains & stations, road-traffic disruptions, weather cameras, road condition & maintenance, ships (AIS), port calls, journey routing',
+    'skills.registers': 'PRH/YTJ business register, avoindata.fi datasets, Statistics Finland StatFin tables, Suomi.fi public-service catalogue',
+    'skills.energy': 'Hourly spot electricity price, price right now, cheapest hours, Fingrid grid data',
+    'skills.civic': 'Parliament: MP search, party seat composition, votes and their per-party breakdown',
+    'skills.culture': 'Finna: search and record detail across libraries, museums and archives',
+    'skills.health': 'THL Sotkanet: health & welfare indicator search and values by region',
+    'skills.places': 'National Land Survey: geocode addresses and place names to coordinates',
+    'skills.events': 'LinkedEvents: concerts, exhibitions and other events across Finland',
+    'skills.library': 'Kirjastot.fi: public library locations and opening hours',
+    'skills.opendata': 'Umbrella entry point that routes general "open data" questions to the right skill',
     'split.kicker': 'Contribute',
     'split.title': 'A list is only as good as its editors',
     'split.copy': "Found something the index is missing? Spotted a description that's out of date? Open an issue or a pull request. Every entry carries the reasoning behind it, so reviewing a change is as easy as reading one — and your name stays on it.",
