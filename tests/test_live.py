@@ -108,3 +108,19 @@ async def test_library_search_live():
 
     out = await library.library_search(LibrarySearchInput(query="Oodi", limit=2))
     assert "Oodi" in out and "Error" not in out
+
+
+async def test_road_maintenance_live():
+    from finnish_open_agent.tools.transport import RoadMaintenanceInput
+
+    out = await transport.transport_get_road_maintenance(RoadMaintenanceInput(limit=3))
+    assert "maintenance" in out.lower() and "Error" not in out
+
+
+async def test_get_open_dataset_live():
+    from finnish_open_agent.tools.registers import DatasetGetInput
+
+    out = await registers.registers_get_open_dataset(
+        DatasetGetInput(name="paakaupunkiseudun-ilmanlaatuindeksit")
+    )
+    assert "Error" not in out and ("Resource" in out or "resource" in out.lower())

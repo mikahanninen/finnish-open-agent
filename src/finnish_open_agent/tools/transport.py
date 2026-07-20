@@ -585,6 +585,70 @@ async def transport_get_port_calls(params: PortCallsInput) -> str:
         return handle_error(exc)
 
 
+MAINTENANCE_TASK_LABELS = {
+    "PLOWING": "Snow ploughing",
+    "SALTING": "Salting",
+    "SPREADING_SAND": "Sanding",
+    "BRUSH_CLEARING": "Brush clearing",
+    "GRASS_AND_BRUSH_CLEARING": "Grass & brush clearing",
+    "PAVING": "Paving",
+    "CLEANING_OF_ROADSIDES": "Roadside cleaning",
+    "PATCHING": "Patching",
+    "ROAD_MARKINGS": "Road markings",
+    "LINE_SANDING": "Line sanding",
+    "MAINTENANCE_OF_GUIDE_SIGNS": "Guide-sign maintenance",
+}
+
+
+class RoadMaintenanceInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    limit: int = Field(default=15, ge=1, le=100)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="transport_get_road_maintenance", annotations={"title": "Road maintenance activity", **_RO})
+async def transport_get_road_maintenance(params: RoadMaintenanceInput) -> str:
+    """Get recent road maintenance activity on Finnish state roads (Fintraffic Digitraffic).
+
+    Shows what maintenance work (ploughing, salting, brush clearing, paving, …) has recently
+    been done and when, from tracked maintenance vehicles.
+
+    Args:
+        params (RoadMaintenanceInput): limit (int 1-100), response_format.
+
+    Returns:
+        str: Markdown table (Task(s), Ended, Direction) or JSON list. On failure "Error: ...".
+    """
+    try:
+        data = await request_json(
+            f"{config.DIGITRAFFIC_ROAD_BASE}/maintenance/v1/tracking/routes",
+            params={"domain": "state-roads"},
+            cache=False,
+        )
+        feats = data.get("features", [])[: params.limit]
+        out = []
+        for f in feats:
+            props = f.get("properties", {})
+            tasks = [MAINTENANCE_TASK_LABELS.get(t, t.replace("_", " ").title()) for t in props.get("tasks", [])]
+            out.append(
+                {
+                    "tasks": ", ".join(tasks) or "—",
+                    "endTime": props.get("endTime", ""),
+                    "direction": props.get("direction", ""),
+                }
+            )
+        if not out:
+            return "No recent road maintenance activity reported."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"count": len(out), "activity": out})
+        rows = [[o["tasks"], o["endTime"].replace("T", " ")[:16], o["direction"]] for o in out]
+        return "# Recent road maintenance (state roads)\n\n" + md_table(
+            ["Task(s)", "Ended (UTC)", "Dir"], rows
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "transport_find_station",
     "transport_get_station_trains",
@@ -594,4 +658,5 @@ __all__ = [
     "transport_get_vessels",
     "transport_get_road_weather",
     "transport_get_port_calls",
+    "transport_get_road_maintenance",
 ]

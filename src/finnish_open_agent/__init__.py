@@ -1,3 +1,3 @@
 """Finnish Open Agent — MCP server and skills for Finnish open data & public services."""
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"

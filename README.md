@@ -14,7 +14,7 @@ portable, and agent-friendly — one codebase, three ways to use it:
 Every tool is available in all three modes automatically. Most services need **no API key** —
 everything here is public, open data.
 
-## Domains (v0.6 — 30 tools)
+## Domains (v0.7 — 32 tools)
 
 Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
@@ -22,8 +22,8 @@ Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-ge
 | --- | --- | --- |
 | ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | spot prices, price now, cheapest hours, Fingrid data |
 | 🌦️ Weather | FMI, HSY | forecast, observations, air quality, sea level & waves |
-| 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, ships (AIS), port calls, journey routing |
-| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search, StatFin browse & data, public-service search & detail |
+| 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, road maintenance, ships (AIS), port calls, journey routing |
+| 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search & detail, StatFin browse & data, public-service search & detail |
 | 🏛️ Civic | Eduskunta (Parliament) | MP search, seat composition, recent votes, vote breakdowns |
 | 🎭 Culture | Finna | cultural-heritage search |
 | 🗺️ Places | National Land Survey (MML) | geocoding |
@@ -64,39 +64,55 @@ See [`PLAN.md`](./PLAN.md) for architecture, [`AGENTS.md`](./AGENTS.md) for a co
 
 ## Quick start
 
-Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/). No clone needed — `uvx` runs it
+straight from GitHub (like `npx`):
 
 ```bash
-uv venv
-uv pip install -e ".[dev]"
+# List every tool
+uvx --from git+https://github.com/mikahanninen/finnish-open-agent finnish-open-agent list
 
-# 1) CLI for humans — run any tool from the terminal
-uv run finnish-open-agent list                                  # list all tools
-uv run finnish-open-agent call energy_cheapest_hours count=3    # human-readable
-uv run finnish-open-agent call library_search query=Oodi        # today's opening hours
+# 1) CLI for humans
+uvx --from git+https://github.com/mikahanninen/finnish-open-agent finnish-open-agent \
+  call energy_cheapest_hours count=3
 
 # 2) JSON output for AI/scripting — add --json
-uv run finnish-open-agent call weather_get_forecast place=Helsinki hours=6 --json
+uvx --from git+https://github.com/mikahanninen/finnish-open-agent finnish-open-agent \
+  call weather_get_forecast place=Helsinki hours=6 --json
+```
 
-# 3) MCP server for agents (stdio by default)
-uv run finnish-open-agent            # or: finnish-open-agent serve
+Tip: alias it — `alias foa='uvx --from git+https://github.com/mikahanninen/finnish-open-agent finnish-open-agent'`
+— then just `foa list`, `foa call library_search query=Oodi`.
+
+### For development (clone)
+
+```bash
+git clone https://github.com/mikahanninen/finnish-open-agent.git
+cd finnish-open-agent
+uv venv && uv pip install -e ".[dev]"
+uv run finnish-open-agent list
 ```
 
 ### Use it from Claude Desktop / Claude Code
 
-Add to your MCP config (e.g. `claude_desktop_config.json`):
+Add to your MCP config (e.g. `claude_desktop_config.json`). This form needs no local path:
 
 ```json
 {
   "mcpServers": {
     "finnish-open-agent": {
-      "command": "uv",
-      "args": ["--directory", "/Users/mika/koodi/finnish-open-agent", "run", "finnish-open-agent"],
-      "env": { "FOA_APP_ID": "mika/finnish-open-agent" }
+      "command": "uvx",
+      "args": [
+        "--from", "git+https://github.com/mikahanninen/finnish-open-agent",
+        "finnish-open-agent"
+      ],
+      "env": { "FOA_APP_ID": "your-name/finnish-open-agent" }
     }
   }
 }
 ```
+
+If you cloned the repo instead, point `uv` at it: `"command": "uv"`, `"args":
+["--directory", "/path/to/finnish-open-agent", "run", "finnish-open-agent"]`.
 
 Then ask things like:
 

@@ -1,18 +1,24 @@
 {
   "//": "Example MCP client config. Copy the 'finnish-open-agent' block into your",
-  "//2": "claude_desktop_config.json (or Claude Code MCP settings). Adjust the path.",
+  "//2": "claude_desktop_config.json (or Claude Code MCP settings).",
+  "//3": "This form runs straight from GitHub via uvx — no clone or local path needed.",
   "mcpServers": {
     "finnish-open-agent": {
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "--directory",
-        "/Users/mika/koodi/finnish-open-agent",
-        "run",
+        "--from",
+        "git+https://github.com/mikahanninen/finnish-open-agent",
         "finnish-open-agent"
       ],
       "env": {
-        "FOA_APP_ID": "mika/finnish-open-agent"
+        "FOA_APP_ID": "your-name/finnish-open-agent"
       }
+    },
+    "//finnish-open-agent-from-clone": {
+      "//": "Alternative if you cloned the repo: point uv at the folder.",
+      "command": "uv",
+      "args": ["--directory", "/path/to/finnish-open-agent", "run", "finnish-open-agent"],
+      "env": { "FOA_APP_ID": "your-name/finnish-open-agent" }
     }
   }
 }

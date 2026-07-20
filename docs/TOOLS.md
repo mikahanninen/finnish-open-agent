@@ -2,7 +2,7 @@
 
 > Auto-generated from the live MCP server by `scripts/render_tools.py`. **Do not edit by hand.**
 
-**30 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
+**32 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
 
 ## ⚡ Energy
 
@@ -115,6 +115,15 @@ Get recent and upcoming ship port calls at Finnish ports (Fintraffic Digitraffic
 | `limit` | no |  |
 | `response_format` | no |  |
 
+### `transport_get_road_maintenance`
+
+Get recent road maintenance activity on Finnish state roads (Fintraffic Digitraffic).
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `limit` | no |  |
+| `response_format` | no |  |
+
 ### `transport_get_road_weather`
 
 Get current road-weather sensor readings from a Fintraffic road weather station.
@@ -180,6 +189,15 @@ Get detailed registry information for a Finnish company by its Business ID.
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `business_id` | yes | Finnish Business ID (Y-tunnus), format 1234567-8. |
+| `response_format` | no |  |
+
+### `registers_get_open_dataset`
+
+Get an avoindata.fi dataset's details and its downloadable resources / API endpoints.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `name` | yes | Dataset name/slug from registers_search_open_datasets (the last URL path segment). |
 | `response_format` | no |  |
 
 ### `registers_get_service`

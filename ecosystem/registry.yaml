@@ -27,7 +27,7 @@ entries:
     tags: [digitraffic, fmi, prh, statistics-finland, eduskunta, finna, cli]
     description: >-
       Open-source, portable, agent-friendly toolkit exposing Finnish open data
-      as 30 tools — usable as a CLI (human), JSON (AI), or MCP server. Covers
+      as 32 tools — usable as a CLI (human), JSON (AI), or MCP server. Covers
       electricity prices, FMI weather/air-quality/sea, Digitraffic road/rail/marine +
       Digitransit routing, PRH/YTJ, avoindata.fi, Statistics Finland & Suomi.fi
       services, Eduskunta MPs & votes, Finna culture, NLS geocoding, and libraries.

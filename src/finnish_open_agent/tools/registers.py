@@ -185,6 +185,51 @@ async def registers_search_open_datasets(params: DatasetSearchInput) -> str:
         return handle_error(exc)
 
 
+class DatasetGetInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    name: str = Field(
+        ..., description="Dataset name/slug from registers_search_open_datasets (the last URL path segment).",
+        min_length=1,
+    )
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="registers_get_open_dataset", annotations={"title": "Get avoindata.fi dataset", **_RO})
+async def registers_get_open_dataset(params: DatasetGetInput) -> str:
+    """Get an avoindata.fi dataset's details and its downloadable resources / API endpoints.
+
+    Use after registers_search_open_datasets to see a dataset's actual data links (CSV, JSON,
+    WFS, API URLs) and formats.
+
+    Args:
+        params (DatasetGetInput): name (dataset slug), response_format.
+
+    Returns:
+        str: Markdown with the dataset title, publisher, and a table of resources
+        (name, format, URL); or JSON with the full CKAN record. On failure "Error: ...".
+    """
+    try:
+        data = await request_json(
+            f"{config.AVOINDATA_CKAN_BASE}/package_show", params={"id": params.name}
+        )
+        r = data.get("result", {})
+        if not r:
+            return f"No dataset found with name '{params.name}'."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json(r)
+        resources = r.get("resources", [])
+        title = (r.get("title") or r.get("name", "")).strip()
+        publisher = (r.get("organization") or {}).get("title", "")
+        rows = [
+            [(res.get("name") or "(unnamed)").strip()[:50], (res.get("format") or "").upper(), res.get("url", "")]
+            for res in resources
+        ]
+        table = md_table(["Resource", "Format", "URL"], rows) if rows else "_No downloadable resources listed._"
+        return f"# {title}\n\n{publisher}\n\n{table}"
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 class StatFinBrowseInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     path: str = Field(
@@ -433,6 +478,7 @@ __all__ = [
     "registers_search_companies",
     "registers_get_company",
     "registers_search_open_datasets",
+    "registers_get_open_dataset",
     "registers_statfin_browse",
     "registers_statfin_get_table",
     "registers_search_services",
