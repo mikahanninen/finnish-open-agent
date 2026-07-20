@@ -145,6 +145,12 @@ body { margin: 0; text-wrap: pretty; }
 /* — skills table (drawn structure, same grammar as .table in the DS: 2px
    rule under the head, 1px seams between rows — a directory, not cards) — */
 .skills { padding: calc(2.5 * var(--leading)) 0 calc(3 * var(--leading)); }
+.skills-install { font-size: 15.5px; line-height: var(--leading); margin: 0;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.skills-install code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.92em; color: var(--color-text);
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  padding: 2px 6px; border-radius: 4px; }
 .skills .table { margin-top: calc(var(--leading) - var(--half)); table-layout: fixed; }
 .skills .table th:first-child, .skills .table td:first-child { padding-left: 0; width: 30%; }
 .skills .table th:last-child, .skills .table td:last-child { padding-right: 0; width: 64px; }
@@ -320,6 +326,7 @@ body[data-baselines]::after {
 
   <section class="skills" id="skills">
     <span class="kicker" data-i18n="skills.kicker">Mitä repo sisältää</span>
+    <p class="skills-install" data-i18n="skills.install">Asenna omaan agenttiin: <code>npx skills add mikahanninen/finnish-open-agent</code></p>
     <table class="table">
       <thead>
         <tr>
@@ -402,6 +409,7 @@ body[data-baselines]::after {
     'feat.4t': 'Kept current',
     'feat.4c': 'The agent landscape turns over weekly. Entries are dated, revisited, and quietly retired when they stop being the answer — so the list stays short enough to trust.',
     'skills.kicker': "What's in the repo",
+    'skills.install': 'Install into your own agent: <code>npx skills add mikahanninen/finnish-open-agent</code>',
     'skills.th1': 'Skill', 'skills.th2': 'Covers', 'skills.th3': 'Tools',
     'skills.weather': 'FMI: forecasts, station observations, air quality, lightning, radiation, sea level & waves',
     'skills.transport': 'VR trains & stations, road-traffic disruptions, weather cameras, road condition & maintenance, ships (AIS), port calls, journey routing',

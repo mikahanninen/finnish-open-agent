@@ -1,8 +1,17 @@
 # Skills
 
 Focused CLI/curl playbooks for Finnish open data — one per domain, so each has a tight,
-well-triggering description and only the recipes it needs. Drop any folder into your agent's
-skills directory (e.g. `~/.claude/skills/`).
+well-triggering description and only the recipes it needs.
+
+Install with the [`skills` CLI](https://github.com/vercel-labs/skills) (supports Claude Code,
+Cursor, Codex, and 70+ other agents):
+
+```bash
+npx skills add mikahanninen/finnish-open-agent          # all 11 skills
+npx skills add mikahanninen/finnish-open-agent -s finnish-weather   # just one
+```
+
+Or drop any folder into your agent's skills directory by hand (e.g. `~/.claude/skills/`).
 
 | Skill | Use it for | Matching MCP tools |
 | --- | --- | --- |

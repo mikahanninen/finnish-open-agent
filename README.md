@@ -166,8 +166,16 @@ uv run python scripts/render_catalog.py
 ## CLI / skill approach
 
 Prefer not to run a server? The [`skills/finnish-open-data`](./skills/finnish-open-data)
-skill documents ready-to-run `curl` recipes for every source above. Drop the folder into
-your agent's skills directory (or `~/.claude/skills/`).
+skill documents ready-to-run `curl` recipes for every source above. Install any or all of
+the 11 skills into your agent with the [`skills` CLI](https://github.com/vercel-labs/skills)
+(supports Claude Code, Cursor, Codex, and 70+ others):
+
+```bash
+npx skills add mikahanninen/finnish-open-agent          # all 11 skills
+npx skills add mikahanninen/finnish-open-agent -s finnish-weather,finnish-transport
+```
+
+Or drop a skill folder into your agent's skills directory by hand (e.g. `~/.claude/skills/`).
 
 ## Testing & CI
 
