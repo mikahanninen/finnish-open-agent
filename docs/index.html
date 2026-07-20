@@ -128,14 +128,13 @@ body { margin: 0; text-wrap: pretty; }
   max-content (measured: nums ≤21px, longest title ≤281px) plus a little air —
   a fixed max-length track otherwise claims that width even when content is shorter */
 .feature + .feature { border-top: 2px solid var(--color-divider); } /* the ruled seam — solid, the system's weight */
-.f-num { position: relative; font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+.f-num { font-family: var(--font-heading); font-weight: var(--font-heading-weight);
   font-size: 15px; line-height: var(--leading); color: var(--color-text);
   font-feature-settings: "tnum" 1; margin: 0; text-box: trim-both cap alphabetic; }
-.f-num::before { content: ""; position: absolute; left: -24px; top: calc(0.5cap - 5px);
-  width: 10px; height: 10px; background: var(--color-accent); } /* the deck's 10px red square,
-     hanging left of the number's axis — at narrow widths the gutter folds it away */
-@media (max-width: 880px) { .f-num::before { display: none; } } /* only once the row itself
-   stacks to one column (see .feature below) does the hanging offset stop making sense */
+.f-num::before { content: ""; display: inline-block; width: 10px; height: 10px;
+  margin-right: 10px; vertical-align: 1px; background: var(--color-accent); } /* the deck's
+     10px red square, inline before the number — flush with the kicker's left edge above it,
+     not hung further out into the gutter */
 .f-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight);
   font-size: 24px; line-height: var(--leading); letter-spacing: -0.01em;
   margin: 0; text-box: trim-both cap alphabetic; }
