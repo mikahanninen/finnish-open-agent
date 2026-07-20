@@ -176,6 +176,13 @@ npx skills add mikahanninen/finnish-open-agent -s finnish-weather # just one
 npx skills add mikahanninen/finnish-open-agent -s finnish-weather,finnish-transport # a few
 ```
 
+Remove them the same way:
+
+```bash
+npx skills remove -s finnish-weather   # just one
+npx skills remove --all                # everything this CLI installed
+```
+
 Or drop a skill folder into your agent's skills directory by hand (e.g. `~/.claude/skills/`).
 
 ## Testing & CI

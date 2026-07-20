@@ -11,6 +11,9 @@ npx skills add mikahanninen/finnish-open-agent          # all 11 skills
 npx skills add mikahanninen/finnish-open-agent -s finnish-weather   # just one
 ```
 
+Remove them the same way — `npx skills remove -s finnish-weather` for just one, or
+`npx skills remove --all` for everything this CLI installed.
+
 Or drop any folder into your agent's skills directory by hand (e.g. `~/.claude/skills/`).
 
 | Skill | Use it for | Matching MCP tools |
