@@ -19,6 +19,8 @@ def test_registry_exposes_all_tools():
         "culture_search",
         "places_geocode",
         "library_search",
+        "health_search_indicators",
+        "events_search",
     ]:
         assert name in reg, name
 

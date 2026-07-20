@@ -22,6 +22,8 @@ ready-to-run `curl` recipes and the matching MCP tool names):
 | `finnish-culture` | Finna: libraries, museums, archives |
 | `finnish-places` | National Land Survey geocoding |
 | `finnish-library` | Public libraries & opening hours (Kirjastot.fi) |
+| `finnish-health` | Health & welfare statistics (THL Sotkanet) |
+| `finnish-events` | Events across Finland (LinkedEvents) |
 
 General etiquette: identify yourself to Fintraffic with a `Digitraffic-User` header; prices
 are c/kWh incl. Finnish VAT; times are ISO 8601 (Finland = UTC+2/+3). When an MCP server

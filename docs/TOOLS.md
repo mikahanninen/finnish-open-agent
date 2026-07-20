@@ -2,7 +2,7 @@
 
 > Auto-generated from the live MCP server by `scripts/render_tools.py`. **Do not edit by hand.**
 
-**36 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
+**40 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
 
 ## ⚡ Energy
 
@@ -90,6 +90,16 @@ Get recent sea-level (mareograph) or wave observations for a Finnish coastal loc
 | `place` | yes | Coastal place/station, e.g. 'Helsinki', 'Kemi', 'Hanko'. |
 | `kind` | no | 'sealevel' (mareograph) or 'wave' (buoys). |
 | `hours` | no | How many past hours to include. |
+| `response_format` | no |  |
+
+### `weather_get_sea_forecast`
+
+Get the FMI sea-level forecast (cm) for an upcoming period at a Finnish coastal location.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `place` | yes | Coastal place, e.g. 'Helsinki', 'Kemi', 'Hanko'. |
+| `hours` | no | How many upcoming forecast hours. |
 | `response_format` | no |  |
 
 ### `weather_get_solar`
@@ -343,6 +353,43 @@ Geocode a Finnish place name or address to coordinates (National Land Survey / M
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `text` | yes | Place name or address, e.g. 'Mannerheimintie 1, Helsinki'. |
+| `limit` | no |  |
+| `response_format` | no |  |
+
+## Events
+
+### `events_search`
+
+Search events in Finland (Helsinki region and beyond) via LinkedEvents.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `query` | no | Free-text search, e.g. 'jazz', 'lasten', 'museum'. |
+| `upcoming_only` | no | Only include events starting from today. |
+| `limit` | no |  |
+| `response_format` | no |  |
+
+## Health
+
+### `health_get_indicator`
+
+Get a THL Sotkanet health/welfare indicator's value for a year (whole country by default).
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `indicator_id` | yes | Sotkanet indicator id from health_search_indicators. |
+| `year` | yes | Year, e.g. 2022. |
+| `region` | no | Sotkanet region id. Omit for the whole country (id 658). |
+| `gender` | no | 'total', 'male', or 'female'. |
+| `response_format` | no |  |
+
+### `health_search_indicators`
+
+Search THL Sotkanet for health & welfare indicators by title (English or Finnish).
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `query` | yes | Words to match in an indicator title, e.g. 'obesity', 'unemployment', 'alcohol'. |
 | `limit` | no |  |
 | `response_format` | no |  |
 

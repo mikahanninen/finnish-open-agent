@@ -14,6 +14,8 @@ skills directory (e.g. `~/.claude/skills/`).
 | [`finnish-culture`](./finnish-culture) | Finna: libraries, museums, archives | `culture_search` |
 | [`finnish-places`](./finnish-places) | National Land Survey geocoding | `places_geocode` |
 | [`finnish-library`](./finnish-library) | Public libraries & opening hours (Kirjastot.fi) | `library_search` |
+| [`finnish-health`](./finnish-health) | Health & welfare statistics (THL Sotkanet) | `health_*` |
+| [`finnish-events`](./finnish-events) | Events across Finland (LinkedEvents) | `events_search` |
 | [`finnish-open-data`](./finnish-open-data) | Umbrella index (general "Finnish open data") | — |
 
 When the `finnish_services_mcp` MCP server is connected, prefer its tools over curl — see the

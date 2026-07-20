@@ -6,9 +6,13 @@ automatically by ``server.py`` via :func:`load_all`.
 
 from __future__ import annotations
 
-from . import civic, culture, energy, library, places, registers, transport, weather
+from . import (
+    civic, culture, energy, events, health, library, places, registers, transport, weather,
+)
 
-MODULES = [energy, weather, transport, registers, civic, culture, places, library]
+MODULES = [
+    energy, weather, transport, registers, civic, culture, places, library, health, events,
+]
 
 
 def load_all() -> None:
@@ -20,5 +24,5 @@ def load_all() -> None:
 
 __all__ = [
     "energy", "weather", "transport", "registers", "civic", "culture", "places", "library",
-    "MODULES", "load_all",
+    "health", "events", "MODULES", "load_all",
 ]

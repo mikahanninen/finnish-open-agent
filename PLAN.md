@@ -176,6 +176,12 @@ tests, docs, skill. ✅
 - Transport: ship port calls (`transport_get_port_calls`). ✅
 - New Library domain: `library_search` (Kirjastot.fi — public libraries & opening hours). ✅
 
+**Phase 3.7 — more sources & new domains.** ✅ (40 tools)
+- Weather: sea-level forecast, national radiation (STUK), solar radiation, lightning. ✅
+- Transport: road maintenance activity. ✅ · Registers: avoindata dataset detail. ✅
+- New Health domain: THL Sotkanet indicator search & values (`health_*`). ✅
+- New Events domain: LinkedEvents search (`events_search`). ✅
+
 **Phase 4 — quality & distribution.** Evaluation suite (per mcp-builder §4), rate-limit
 handling, publish to an MCP registry, optional Docker image for the HTTP mode.
 

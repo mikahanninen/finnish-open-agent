@@ -420,6 +420,58 @@ async def weather_get_radiation() -> str:
         return handle_error(exc)
 
 
+class SeaForecastInput(BaseModel):
+    """Input for the FMI sea-level forecast."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    place: str = Field(..., description="Coastal place, e.g. 'Helsinki', 'Kemi', 'Hanko'.", min_length=1)
+    hours: int = Field(default=12, ge=1, le=48, description="How many upcoming forecast hours.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="weather_get_sea_forecast", annotations={"title": "FMI sea-level forecast", **_RO})
+async def weather_get_sea_forecast(params: SeaForecastInput) -> str:
+    """Get the FMI sea-level forecast (cm) for an upcoming period at a Finnish coastal location.
+
+    Useful for flood/high-water awareness. SeaLevel is relative to theoretical mean water;
+    SeaLevelN2000 is relative to the N2000 height reference. Source: FMI.
+
+    Args:
+        params (SeaForecastInput): place (str), hours (int 1-48), response_format.
+
+    Returns:
+        str: Markdown table (time, SeaLevel, SeaLevelN2000 in cm) for upcoming hours, or JSON.
+        On failure "Error: ...".
+    """
+    try:
+        text = await request_text(
+            config.FMI_WFS_BASE,
+            params={
+                "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                "storedquery_id": "fmi::forecast::sealevel::point::simple",
+                "place": params.place, "timestep": "60",
+            },
+        )
+        merged: dict[str, dict] = {}
+        for r in _parse_simple_features(text):
+            merged.setdefault(r["time"], {"time": r["time"]}).update(r)
+        result = sorted(merged.values(), key=lambda r: r["time"])[: params.hours]  # upcoming
+        if not result:
+            return f"No sea-level forecast for '{params.place}'. Use a coastal location."
+        cols = [c for c in ("SeaLevel", "SeaLevelN2000") if any(r.get(c) is not None for r in result)]
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"place": params.place, "rows": result})
+        header = "| Time (UTC) | " + " | ".join(f"{c} (cm)" for c in cols) + " |"
+        sep = "| --- | " + " | ".join(["---"] * len(cols)) + " |"
+        lines = [f"# FMI sea-level forecast — {params.place}", "", header, sep]
+        for r in result:
+            lines.append(f"| {r['time']} | " + " | ".join("" if r.get(c) is None else str(r.get(c)) for c in cols) + " |")
+        return "\n".join(lines)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 @mcp.tool(name="weather_get_lightning", annotations={"title": "Lightning activity (FMI)", **_RO})
 async def weather_get_lightning() -> str:
     """Get current lightning-strike activity over Finland and the Baltic from FMI.
@@ -518,4 +570,5 @@ __all__ = [
     "weather_get_radiation",
     "weather_get_solar",
     "weather_get_lightning",
+    "weather_get_sea_forecast",
 ]

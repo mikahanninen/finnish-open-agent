@@ -22,6 +22,8 @@ Domains covered in this version:
   • Culture    — Finna: libraries, museums & archives search
   • Places     — National Land Survey geocoding
   • Library    — Kirjastot.fi: public libraries & opening hours
+  • Health     — THL Sotkanet: health & welfare statistical indicators
+  • Events     — LinkedEvents: events happening in Finland
 
 Most tools need no API key. Prices are in c/kWh incl. Finnish VAT unless noted.
 Times are ISO 8601; Finnish local time is UTC+2 (winter) / UTC+3 (summer).

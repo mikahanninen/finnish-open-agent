@@ -14,7 +14,7 @@ portable, and agent-friendly — one codebase, three ways to use it:
 Every tool is available in all three modes automatically. Most services need **no API key** —
 everything here is public, open data.
 
-## Domains (v0.9 — 36 tools)
+## Domains (v0.10 — 40 tools)
 
 Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
@@ -28,6 +28,8 @@ Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-ge
 | 🎭 Culture | Finna | cultural-heritage search & record detail |
 | 🗺️ Places | National Land Survey (MML) | geocoding |
 | 📚 Library | Kirjastot.fi | public library search & opening hours |
+| 🩺 Health | THL Sotkanet | health & welfare indicator search & values |
+| 🎫 Events | LinkedEvents | search events across Finland |
 
 Three tools need a free key (see Configuration): `transport_plan_route` (Digitransit),
 `energy_fingrid_latest` (Fingrid), and `places_geocode` (National Land Survey). Everything
@@ -56,6 +58,8 @@ Every Finnish service this repository integrates, what it provides, and whether 
 | Finna (National Library) | Libraries, museums & archives search | no | Culture |
 | Maanmittauslaitos (NLS) | Geocoding — place/address → coordinates | free key | Places |
 | Kirjastot.fi | Public libraries — directory & opening hours | no | Library |
+| THL Sotkanet | Health & welfare statistical indicators by region/year | no | Health |
+| LinkedEvents | Events across Finland (concerts, exhibitions, etc.) | no | Events |
 
 All data is public and open; each source sets its own license (mostly CC BY 4.0 — attribute
 the originator). See the [tool reference](./docs/TOOLS.md) for the tools built on each.

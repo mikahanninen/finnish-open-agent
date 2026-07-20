@@ -48,6 +48,23 @@ def test_library_today_hours():
     assert _today_hours({"schedules": [{"closed": True}]}) == "closed today"
     assert _today_hours({}) == ""
 
+
+def test_health_title_prefers_english():
+    from finnish_open_agent.tools.health import _title
+
+    assert _title({"title": {"fi": "Väestö", "en": "Population"}}) == "Population"
+    assert _title({"title": {"fi": "Väestö"}}) == "Väestö"
+    assert _title({}) == ""
+
+
+def test_events_localized_pick():
+    from finnish_open_agent.tools.events import _loc
+
+    assert _loc({"fi": "Konsertti", "en": "Concert"}) == "Konsertti"
+    assert _loc({"en": "Concert"}) == "Concert"
+    assert _loc("plain") == "plain"
+    assert _loc(None) == ""
+
 SAMPLE_FMI = """<?xml version="1.0" encoding="UTF-8"?>
 <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"
     xmlns:BsWfs="http://xml.fmi.fi/schema/wfs/2.0"

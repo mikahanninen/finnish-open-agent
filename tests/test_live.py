@@ -148,3 +148,26 @@ async def test_finna_record_live():
 
     out = await culture.culture_get_record(RecordInput(record_id="eepos.136605"))
     assert "finna.fi/Record" in out and "Error" not in out
+
+
+async def test_sea_forecast_live():
+    from finnish_open_agent.tools.weather import SeaForecastInput
+
+    out = await weather.weather_get_sea_forecast(SeaForecastInput(place="Helsinki", hours=3))
+    assert "sea-level forecast" in out.lower() and "Error" not in out
+
+
+async def test_health_indicator_live():
+    from finnish_open_agent.tools import health
+    from finnish_open_agent.tools.health import IndicatorGetInput
+
+    out = await health.health_get_indicator(IndicatorGetInput(indicator_id=127, year=2022))
+    assert "Whole country" in out and "Error" not in out
+
+
+async def test_events_search_live():
+    from finnish_open_agent.tools import events
+    from finnish_open_agent.tools.events import EventSearchInput
+
+    out = await events.events_search(EventSearchInput(query="museum", limit=3))
+    assert "Error" not in out

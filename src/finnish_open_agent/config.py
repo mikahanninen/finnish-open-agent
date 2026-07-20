@@ -61,5 +61,9 @@ FINNA_BASE = "https://api.finna.fi/v1"
 PTV_BASE = "https://api.palvelutietovaranto.suomi.fi/api/v11"
 # Kirjastot.fi — Finnish public library directory & opening hours (key-less).
 KIRJASTOT_BASE = "https://api.kirjastot.fi/v4"
+# THL Sotkanet — health & welfare statistical indicators (key-less).
+SOTKANET_BASE = "https://sotkanet.fi/rest/1.1"
+# LinkedEvents — events in Finland (Helsinki region + more), key-less.
+LINKEDEVENTS_BASE = "https://api.hel.fi/linkedevents/v1"
 # National Land Survey (Maanmittauslaitos) geocoding — needs a free API key.
 NLS_GEOCODING_BASE = "https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias"
