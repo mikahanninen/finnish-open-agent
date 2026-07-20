@@ -11,27 +11,25 @@ description: >-
 FMI serves XML via WFS stored queries (no key). Each `<BsWfs:BsWfsElement>` has a `Time`,
 `ParameterName`, `ParameterValue`; pivot by time.
 
-Forecast (HARMONIE):
+Forecast (HARMONIE). Note: a `\` before a newline is only a line-continuation *outside*
+quotes — inside a single-quoted string it's taken literally and breaks the request, so keep
+each URL on one line:
 
 ```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=fmi::forecast::harmonie::surface::point::simple\
-&place=Helsinki&parameters=Temperature,WindSpeedMS,Humidity&timestep=60'
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::harmonie::surface::point::simple&place=Helsinki&parameters=Temperature,WindSpeedMS,Humidity&timestep=60'
 ```
 
 Station observations (`t2m`=temp, `ws_10min`=wind, `rh`=humidity, `r_1h`=rain):
 
 ```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=fmi::observations::weather::simple&place=Tampere&parameters=t2m,ws_10min,rh'
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::simple&place=Tampere&parameters=t2m,ws_10min,rh'
 ```
 
 Air quality — **do NOT send `&parameters=`** (returns 0); use `urban::` for the Helsinki
 region and `fmi::` elsewhere. `AQINDEX_PT1H_avg` = index (1 good … 5+ very poor):
 
 ```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=urban::observations::airquality::hourly::simple&place=Helsinki'
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=urban::observations::airquality::hourly::simple&place=Helsinki'
 ```
 
 Sea level / waves (coastal stations): stored queries
@@ -42,8 +40,7 @@ Solar radiation (GLOB_1MIN W/m², UVB_U) with `fmi::observations::radiation::sim
 National background radiation (STUK, dose rate `DR_PT10M_avg` µSv/h; normal ≈ 0.1):
 
 ```bash
-curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature\
-&storedquery_id=stuk::observations::external-radiation::latest::simple' | grep -c BsWfsElement
+curl -s 'https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=stuk::observations::external-radiation::latest::simple' | grep -c BsWfsElement
 ```
 
 **Prefer the MCP tools:** `weather_get_forecast`, `weather_get_observations`,

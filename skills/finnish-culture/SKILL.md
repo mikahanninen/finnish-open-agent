@@ -12,8 +12,7 @@ Finna (National Library of Finland) aggregates records from hundreds of institut
 Each record page is `https://www.finna.fi/Record/<id>`.
 
 ```bash
-curl -s 'https://api.finna.fi/v1/search?lookfor=Tove%20Jansson&limit=5\
-&field%5B%5D=title&field%5B%5D=id&field%5B%5D=year&field%5B%5D=formats&field%5B%5D=buildings' \
+curl -s 'https://api.finna.fi/v1/search?lookfor=Tove%20Jansson&limit=5&field%5B%5D=title&field%5B%5D=id&field%5B%5D=year&field%5B%5D=formats&field%5B%5D=buildings' \
   | jq '.records[] | {title, year, id}'
 ```
 

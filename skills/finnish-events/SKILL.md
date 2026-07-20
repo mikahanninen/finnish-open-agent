@@ -9,9 +9,13 @@ description: >-
 # Finnish events — LinkedEvents (CLI)
 
 Key-less. Free-text search; `include=location` expands the venue; `start=today` for upcoming.
+Always add `super_event_type=none` too — without it, long-running recurring series (a weekly
+library program, say) rank above genuine one-off events when sorted by `start_time`, because
+their `start_time` is the series' original anchor date (sometimes months old, occasionally a
+garbled year in the source data) even while the series is still active:
 
 ```bash
-curl -s 'https://api.hel.fi/linkedevents/v1/event/?text=jazz&page_size=5&include=location&start=today&sort=start_time' \
+curl -s 'https://api.hel.fi/linkedevents/v1/event/?text=jazz&page_size=5&include=location&start=today&sort=start_time&super_event_type=none' \
   | jq '.data[] | {name:(.name.fi // .name.en), start:.start_time, place:(.location.name.fi // .location.name.en)}'
 ```
 

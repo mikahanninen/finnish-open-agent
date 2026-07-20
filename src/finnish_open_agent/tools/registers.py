@@ -170,7 +170,7 @@ async def registers_search_open_datasets(params: DatasetSearchInput) -> str:
                     "title": (d.get("title") or d.get("name", "")).strip(),
                     "publisher": (d.get("organization") or {}).get("title", ""),
                     "resources": d.get("num_resources", 0),
-                    "url": f"https://www.avoindata.fi/data/en_GB/dataset/{d.get('name', '')}",
+                    "url": f"https://avoindata.suomi.fi/data/en_GB/dataset/{d.get('name', '')}",
                 }
             )
         if not out:

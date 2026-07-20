@@ -8,30 +8,32 @@ description: >-
 
 # Finnish transport (Fintraffic Digitraffic + Digitransit, CLI)
 
-Send `-H 'Digitraffic-User: your-name/app'` to Digitraffic. Times are UTC.
+Send `-H 'Digitraffic-User: your-name/app'` to Digitraffic. Times are UTC. **Every**
+Digitraffic endpoint (rail, road, marine) now rejects requests without gzip with `406 Not
+Acceptable` — always pass `--compressed` (or `-H 'Accept-Encoding: gzip'`):
 
 Find a station code, then live trains:
 
 ```bash
-curl -s -H 'Digitraffic-User: mika/foa' https://rata.digitraffic.fi/api/v1/metadata/stations \
+curl -s --compressed -H 'Digitraffic-User: mika/foa' https://rata.digitraffic.fi/api/v1/metadata/stations \
   | jq '.[] | select(.stationName|test("Tampere")) | .stationShortCode'
-curl -s -H 'Digitraffic-User: mika/foa' \
+curl -s --compressed -H 'Digitraffic-User: mika/foa' \
   'https://rata.digitraffic.fi/api/v1/live-trains/station/TPE?departing_trains=8'
 ```
 
 Road traffic messages, weather cameras, and road-weather station data:
 
 ```bash
-curl -s -H 'Digitraffic-User: mika/foa' \
+curl -s --compressed -H 'Digitraffic-User: mika/foa' \
   'https://tie.digitraffic.fi/api/traffic-message/v1/messages?inactiveHours=0&situationType=TRAFFIC_ANNOUNCEMENT'
-curl -s -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weathercam/v1/stations
-curl -s -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weather/v1/stations/1001/data
+curl -s --compressed -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weathercam/v1/stations
+curl -s --compressed -H 'Digitraffic-User: mika/foa' https://tie.digitraffic.fi/api/weather/v1/stations/1001/data
 ```
 
 Live ships (AIS, `sog`=speed knots); join names from `/ais/v1/vessels`:
 
 ```bash
-curl -s -H 'Digitraffic-User: mika/foa' https://meri.digitraffic.fi/api/ais/v1/locations | jq '.features[:3]'
+curl -s --compressed -H 'Digitraffic-User: mika/foa' https://meri.digitraffic.fi/api/ais/v1/locations | jq '.features[:3]'
 ```
 
 Journey planning (Digitransit) needs a free key from portal-api.digitransit.fi — geocode then

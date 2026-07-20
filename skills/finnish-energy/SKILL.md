@@ -10,10 +10,14 @@ description: >-
 
 Prices are c/kWh **including 25.5% Finnish VAT**. No API key needed.
 
-Hourly spot price for today (+ tomorrow after ~14:00 EET):
+Hourly spot price, next 6 hours from now (+ tomorrow after ~14:00 EET). The API returns
+`prices` **newest-first** — `.prices[:6]` grabs the furthest-future hours, not the upcoming
+ones, so filter by time and sort ascending instead:
 
 ```bash
-curl -s https://api.porssisahko.net/v1/latest-prices.json | jq '.prices[:6]'
+NOW=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+curl -s https://api.porssisahko.net/v1/latest-prices.json \
+  | jq --arg now "$NOW" '.prices | map(select(.startDate >= $now)) | sort_by(.startDate) | .[0:6]'
 ```
 
 Current-hour price:
@@ -22,10 +26,14 @@ Current-hour price:
 curl -s https://api.spot-hinta.fi/JustNow | jq '{c_per_kwh:(.PriceWithTax*100)}'
 ```
 
-Cheapest upcoming hours (schedule the sauna / EV / dishwasher):
+Cheapest upcoming hours (schedule the sauna / EV / dishwasher). `TodayAndDayForward` returns
+**15-minute slots for the whole 48h window including already-past ones** — sorting by price
+alone (no time filter) can surface hours from earlier today. Filter to the future first:
 
 ```bash
-curl -s https://api.spot-hinta.fi/TodayAndDayForward | jq 'sort_by(.PriceWithTax)[:5]'
+NOW=$(TZ=Europe/Helsinki date +%Y-%m-%dT%H:%M:%S)
+curl -s https://api.spot-hinta.fi/TodayAndDayForward \
+  | jq --arg now "$NOW" '[.[] | select(.DateTime[0:19] >= $now)] | sort_by(.PriceWithTax)[:5]'
 ```
 
 Grid/production data (Fingrid) needs a free key from data.fingrid.fi:

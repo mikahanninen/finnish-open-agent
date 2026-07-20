@@ -17,10 +17,12 @@ curl -s 'https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Supercell' 
 curl -s 'https://avoindata.prh.fi/opendata-ytj-api/v3/companies?businessId=2336509-6' | jq '.companies[0]'
 ```
 
-Open-data catalogue (avoindata.fi / CKAN):
+Open-data catalogue (avoindata.fi / CKAN). Use `avoindata.suomi.fi` directly — the old
+`www.avoindata.fi` host now 301-redirects there, which silently breaks a plain `curl | jq`
+pipe (curl doesn't follow redirects by default, so `jq` gets an HTML redirect page):
 
 ```bash
-curl -s 'https://www.avoindata.fi/data/api/3/action/package_search?q=air%20quality&rows=5' \
+curl -s 'https://avoindata.suomi.fi/data/api/3/action/package_search?q=air%20quality&rows=5' \
   | jq '.result.results[] | {title, name}'
 ```
 

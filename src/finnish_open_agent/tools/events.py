@@ -51,7 +51,11 @@ async def events_search(params: EventSearchInput) -> str:
         str: Markdown list of "Event — start · place" with a link, or JSON. On failure "Error: ...".
     """
     try:
-        q: dict = {"page_size": params.limit, "include": "location", "sort": "start_time"}
+        # Exclude recurring series (super_event_type=recurring): their start_time is the
+        # series' original anchor date, which can be months old (or a garbled year in the
+        # source data) even while the series is still running — sorting by start_time then
+        # floats these ahead of genuine one-off upcoming events.
+        q: dict = {"page_size": params.limit, "include": "location", "sort": "start_time", "super_event_type": "none"}
         if params.query:
             q["text"] = params.query
         if params.upcoming_only:
