@@ -6,6 +6,8 @@ API. Requires a free API key in NLS_API_KEY (register at maanmittauslaitos.fi).
 
 from __future__ import annotations
 
+import base64
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from .. import config
@@ -48,14 +50,18 @@ async def places_geocode(params: GeocodeInput) -> str:
             "https://www.maanmittauslaitos.fi/rajapinnat/api-avaimen-ohje and set NLS_API_KEY."
         )
     try:
+        # HTTP Basic auth (key as username, blank password) per MML's docs — keeps the key
+        # out of the URL/query string, unlike the api-key=... query-param alternative they
+        # also support (query-string keys leak into proxy/access logs and browser history).
+        basic = base64.b64encode(f"{config.NLS_API_KEY}:".encode()).decode()
         data = await request_json(
             f"{config.NLS_GEOCODING_BASE}/search",
             params={
                 "text": params.text,
                 "size": params.limit,
                 "crs": "EPSG:4326",
-                "api-key": config.NLS_API_KEY,
             },
+            headers={"Authorization": f"Basic {basic}"},
         )
         feats = data.get("features", [])
         out = []
