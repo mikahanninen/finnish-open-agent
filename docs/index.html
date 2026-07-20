@@ -130,7 +130,8 @@ body { margin: 0; text-wrap: pretty; }
 .f-num::before { content: ""; position: absolute; left: -24px; top: calc(0.5cap - 5px);
   width: 10px; height: 10px; background: var(--color-accent); } /* the deck's 10px red square,
      hanging left of the number's axis — at narrow widths the gutter folds it away */
-@media (max-width: 1280px) { .f-num::before { display: none; } }
+@media (max-width: 880px) { .f-num::before { display: none; } } /* only once the row itself
+   stacks to one column (see .feature below) does the hanging offset stop making sense */
 .f-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight);
   font-size: 24px; line-height: var(--leading); letter-spacing: -0.01em;
   margin: 0; text-box: trim-both cap alphabetic; }
