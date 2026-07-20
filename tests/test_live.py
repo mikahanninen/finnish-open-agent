@@ -124,3 +124,15 @@ async def test_get_open_dataset_live():
         DatasetGetInput(name="paakaupunkiseudun-ilmanlaatuindeksit")
     )
     assert "Error" not in out and ("Resource" in out or "resource" in out.lower())
+
+
+async def test_radiation_live():
+    out = await weather.weather_get_radiation()
+    assert "radiation" in out.lower() and "Error" not in out
+
+
+async def test_solar_live():
+    from finnish_open_agent.tools.weather import SolarInput
+
+    out = await weather.weather_get_solar(SolarInput(place="Helsinki", hours=2))
+    assert "solar" in out.lower() and "Error" not in out

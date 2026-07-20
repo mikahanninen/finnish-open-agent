@@ -14,14 +14,14 @@ portable, and agent-friendly — one codebase, three ways to use it:
 Every tool is available in all three modes automatically. Most services need **no API key** —
 everything here is public, open data.
 
-## Domains (v0.7 — 32 tools)
+## Domains (v0.8 — 34 tools)
 
 Full, always-current tool reference: [`docs/TOOLS.md`](./docs/TOOLS.md) (auto-generated).
 
 | Domain | Source | Tools |
 | --- | --- | --- |
 | ⚡ Energy | porssisahko.net, spot-hinta.fi, Fingrid | spot prices, price now, cheapest hours, Fingrid data |
-| 🌦️ Weather | FMI, HSY | forecast, observations, air quality, sea level & waves |
+| 🌦️ Weather | FMI, HSY, STUK | forecast, observations, air quality, sea level & waves, solar radiation, national radiation (STUK) |
 | 🚆 Transport | Fintraffic Digitraffic, Digitransit | stations & live trains, traffic messages, weather cameras, road-weather conditions, road maintenance, ships (AIS), port calls, journey routing |
 | 🏢 Registers | PRH/YTJ, avoindata.fi, Statistics Finland, Suomi.fi | company search & detail, open-dataset search & detail, StatFin browse & data, public-service search & detail |
 | 🏛️ Civic | Eduskunta (Parliament) | MP search, seat composition, recent votes, vote breakdowns |
@@ -43,6 +43,7 @@ Every Finnish service this repository integrates, what it provides, and whether 
 | Fingrid open data | Grid load, production mix, wind/nuclear/hydro time series | free key | Energy |
 | FMI — Finnish Meteorological Institute | Forecasts, station observations, sea level & waves | no | Weather |
 | HSY (via FMI `urban::`) | Helsinki-region air quality | no | Weather |
+| STUK (via FMI) | National external (background) radiation dose rate | no | Weather |
 | Fintraffic Digitraffic — rail | VR live trains, timetables, station metadata | no | Transport |
 | Fintraffic Digitraffic — road | Traffic messages, weather cameras, road-weather stations | no | Transport |
 | Fintraffic Digitraffic — marine | AIS live ship positions, port calls | no | Transport |

@@ -2,7 +2,7 @@
 
 > Auto-generated from the live MCP server by `scripts/render_tools.py`. **Do not edit by hand.**
 
-**32 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
+**34 tools.** All are read-only. See [`PLAN.md`](../PLAN.md) for architecture.
 
 ## ⚡ Energy
 
@@ -73,6 +73,10 @@ Get recent real weather-station observations for a Finnish location from FMI.
 | `parameters` | no | FMI observation parameters (t2m=temp, ws_10min=wind, rh=humidity, r_1h=rain). |
 | `response_format` | no |  |
 
+### `weather_get_radiation`
+
+Get Finland's current external (background) radiation levels from STUK, nationwide.
+
 ### `weather_get_sea`
 
 Get recent sea-level (mareograph) or wave observations for a Finnish coastal location (FMI).
@@ -81,6 +85,16 @@ Get recent sea-level (mareograph) or wave observations for a Finnish coastal loc
 | --- | --- | --- |
 | `place` | yes | Coastal place/station, e.g. 'Helsinki', 'Kemi', 'Hanko'. |
 | `kind` | no | 'sealevel' (mareograph) or 'wave' (buoys). |
+| `hours` | no | How many past hours to include. |
+| `response_format` | no |  |
+
+### `weather_get_solar`
+
+Get recent solar-radiation observations for a Finnish location from FMI.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `place` | yes | Finnish place with a radiation station, e.g. 'Helsinki', 'Jokioinen', 'Sodankylä'. |
 | `hours` | no | How many past hours to include. |
 | `response_format` | no |  |
 

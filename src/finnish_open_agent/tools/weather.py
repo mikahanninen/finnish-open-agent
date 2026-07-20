@@ -357,9 +357,133 @@ async def weather_get_sea(params: SeaInput) -> str:
         return handle_error(exc)
 
 
+def _extract_values(xml_text: str, param_name: str) -> list[float]:
+    """Collect all non-NaN ParameterValue floats for a given parameter across all features."""
+    root = ET.fromstring(xml_text)
+    out: list[float] = []
+    for elem in root.iter():
+        if _local(elem.tag) != "BsWfsElement":
+            continue
+        name = value = None
+        for child in elem:
+            local = _local(child.tag)
+            if local == "ParameterName":
+                name = (child.text or "").strip()
+            elif local == "ParameterValue":
+                try:
+                    v = float((child.text or "").strip())
+                    value = None if v != v else v
+                except ValueError:
+                    value = None
+        if name == param_name and value is not None:
+            out.append(value)
+    return out
+
+
+@mcp.tool(name="weather_get_radiation", annotations={"title": "External radiation (STUK)", **_RO})
+async def weather_get_radiation() -> str:
+    """Get Finland's current external (background) radiation levels from STUK, nationwide.
+
+    Summarises the latest 10-minute-average dose rate (µSv/h) across STUK's ~250 monitoring
+    stations. Typical Finnish background is roughly 0.05–0.30 µSv/h. Source: STUK via FMI.
+
+    Returns:
+        str: Station count, average, min and max dose rate (µSv/h) and a plain-language status.
+        On failure "Error: ...".
+    """
+    try:
+        text = await request_text(
+            config.FMI_WFS_BASE,
+            params={
+                "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                "storedquery_id": "stuk::observations::external-radiation::latest::simple",
+            },
+        )
+        vals = _extract_values(text, "DR_PT10M_avg")
+        if not vals:
+            return "No external-radiation readings available right now."
+        n, mn, mx = len(vals), min(vals), max(vals)
+        avg = sum(vals) / n
+        status = (
+            "Normal background levels across the country."
+            if mx <= 0.40
+            else "Some stations read above typical background — see STUK for details."
+        )
+        return (
+            "# External radiation in Finland (STUK)\n\n"
+            f"- **Stations reporting:** {n}\n"
+            f"- **Average dose rate:** {avg:.3f} µSv/h\n"
+            f"- **Range:** {mn:.3f} – {mx:.3f} µSv/h\n\n"
+            f"{status}"
+        )
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
+class SolarInput(BaseModel):
+    """Input for FMI solar-radiation observations."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    place: str = Field(..., description="Finnish place with a radiation station, e.g. 'Helsinki', 'Jokioinen', 'Sodankylä'.", min_length=1)
+    hours: int = Field(default=6, ge=1, le=48, description="How many past hours to include.")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+@mcp.tool(name="weather_get_solar", annotations={"title": "FMI solar radiation", **_RO})
+async def weather_get_solar(params: SolarInput) -> str:
+    """Get recent solar-radiation observations for a Finnish location from FMI.
+
+    Parameters include GLOB_1MIN (global radiation W/m²), DIFF_1MIN (diffuse), DIR_1MIN
+    (direct), UVB_U (UV-B) and SUND_1MIN (sunshine). Only some stations measure radiation.
+
+    Args:
+        params (SolarInput): place (str), hours (int 1-48), response_format.
+
+    Returns:
+        str: Markdown table or JSON of {"time", <param>...} rows, most recent last.
+        On failure "Error: ...".
+    """
+    try:
+        text = await request_text(
+            config.FMI_WFS_BASE,
+            params={
+                "service": "WFS", "version": "2.0.0", "request": "getFeature",
+                "storedquery_id": "fmi::observations::radiation::simple",
+                "place": params.place, "timestep": "60",
+            },
+        )
+        merged: dict[str, dict] = {}
+        for r in _parse_simple_features(text):
+            slot = merged.setdefault(r["time"], {"time": r["time"]})
+            for k, v in r.items():
+                if k == "time":
+                    continue
+                if v is not None or k not in slot:
+                    slot[k] = v
+        cols = sorted({k for row in merged.values() for k in row if k != "time"})
+        rows = [row for row in merged.values() if any(row.get(c) is not None for c in cols)]
+        result = sorted(rows, key=lambda r: r["time"])[-params.hours :]
+        if not result:
+            return f"No solar-radiation data for '{params.place}'. Try Helsinki, Jokioinen, or Sodankylä."
+        if params.response_format == ResponseFormat.JSON:
+            return as_json({"place": params.place, "rows": result})
+        header = "| Time (UTC) | " + " | ".join(cols) + " |"
+        sep = "| --- | " + " | ".join(["---"] * len(cols)) + " |"
+        lines = [f"# FMI solar radiation at {params.place}", "", header, sep]
+        for r in result:
+            vals = [("" if r.get(c) is None else str(r.get(c))) for c in cols]
+            lines.append(f"| {r['time']} | " + " | ".join(vals) + " |")
+        return "\n".join(lines)
+    except Exception as exc:  # noqa: BLE001
+        return handle_error(exc)
+
+
 __all__ = [
     "weather_get_forecast",
     "weather_get_observations",
     "weather_get_air_quality",
     "weather_get_sea",
+    "weather_get_radiation",
+    "weather_get_solar",
 ]
