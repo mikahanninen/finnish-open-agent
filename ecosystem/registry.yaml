@@ -4,8 +4,9 @@
 # services. We LINK to each project at its source; we do NOT copy anyone's
 # code into this repo. Each author keeps ownership, license, and credit.
 #
-# To add your project, open a PR that appends an entry below and run
-# `python scripts/render_catalog.py` to regenerate ecosystem/CATALOG.md.
+# To add your project, open a PR that appends an entry below and run:
+#   python scripts/render_catalog.py            # regenerates ecosystem/CATALOG.md
+#   python scripts/render_community_table.py     # regenerates the site's community table
 # See CONTRIBUTING.md for the (short) inclusion criteria.
 # ---------------------------------------------------------------------------
 version: 1

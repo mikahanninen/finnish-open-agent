@@ -39,11 +39,13 @@ Listing is not an endorsement, and we don't vet security — users verify projec
        One or two sentences on what it does.
    ```
 
-2. Regenerate the catalog and validate:
+2. Regenerate the catalog and the site's community table, and validate:
 
    ```bash
-   uv run python scripts/render_catalog.py          # writes ecosystem/CATALOG.md
-   uv run python scripts/render_catalog.py --check   # CI runs this
+   uv run python scripts/render_catalog.py            # writes ecosystem/CATALOG.md
+   uv run python scripts/render_community_table.py     # writes docs/index.html's community table
+   uv run python scripts/render_catalog.py --check           # CI runs both --check variants
+   uv run python scripts/render_community_table.py --check
    ```
 
 3. Open a PR. Please only add/curate your own entry (or fix stale info). We may tidy wording.
