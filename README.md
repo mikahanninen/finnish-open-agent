@@ -152,15 +152,21 @@ its author under its own license; nothing is copied here. Browse
 [`ecosystem/CATALOG.md`](./ecosystem/CATALOG.md) (auto-generated from
 [`ecosystem/registry.yaml`](./ecosystem/registry.yaml)).
 
-Featured community entry: **[WilmAI](https://github.com/aikarjal/wilmai)** by `aikarjal`
-([wilm.ai](https://www.wilm.ai/)) — an open-source CLI that reads the Wilma school system
-(schedule, homework, grades, attendance…) as clean JSON, with an AI-agent-friendly mode.
+Featured community entries:
+
+- **[WilmAI](https://github.com/aikarjal/wilmai)** by `aikarjal` ([wilm.ai](https://www.wilm.ai/)) —
+  an open-source CLI that reads the Wilma school system (schedule, homework, grades,
+  attendance…) as clean JSON, with an AI-agent-friendly mode.
+- **[maiklubi](https://github.com/jannemakela/maiklubi)** by Janne Mäkelä — an AI-friendly CLI
+  for myclub.fi that consolidates family sports-club events, RSVPs, invoices, and notifications
+  from the terminal or an AI agent.
 
 Want your project listed? Add one entry to the registry and open a PR — see
-[CONTRIBUTING.md](./CONTRIBUTING.md). To regenerate the catalog:
+[CONTRIBUTING.md](./CONTRIBUTING.md). To regenerate the catalog and the site's community table:
 
 ```bash
 uv run python scripts/render_catalog.py
+uv run python scripts/render_community_table.py
 ```
 
 ## CLI / skill approach

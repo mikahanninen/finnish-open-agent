@@ -17,7 +17,7 @@ of other Finnish skills/MCPs. Python, managed with `uv`. Most APIs need no key.
 | [`README.md`](./README.md) | Human overview, install, configuration, domain table. |
 | [`PLAN.md`](./PLAN.md) | Architecture, the full Finnish open-data landscape, and the roadmap. |
 | [`ecosystem/CATALOG.md`](./ecosystem/CATALOG.md) | **Auto-generated** catalog of community Finnish skills/MCPs (from `ecosystem/registry.yaml`). |
-| [`skills/`](./skills) | Per-domain CLI/curl skills (energy, weather, transport, registers, civic, culture, places). |
+| [`skills/`](./skills) | Per-domain CLI/curl skills (energy, weather, transport, registers, civic, culture, places, library, health, events, plus an open-data umbrella). |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | How to add a tool or list a project. |
 
 ## Code map
@@ -32,8 +32,9 @@ src/finnish_open_agent/
   tools/            one module per domain; each @mcp.tool lives here
     energy · weather · transport · registers · civic · culture · places · library
 scripts/
-  render_tools.py   regenerates docs/TOOLS.md  (CI runs --check)
-  render_catalog.py regenerates ecosystem/CATALOG.md  (CI runs --check)
+  render_tools.py           regenerates docs/TOOLS.md  (CI runs --check)
+  render_catalog.py         regenerates ecosystem/CATALOG.md  (CI runs --check)
+  render_community_table.py regenerates the community table in docs/index.html  (CI runs --check)
 tests/              offline (test_parsing/registry/docs/cli) + live (test_live, -m live)
 ```
 
