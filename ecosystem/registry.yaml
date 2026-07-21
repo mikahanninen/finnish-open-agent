@@ -66,6 +66,12 @@ entries:
       consistent JSON across tenants. Ships an interactive parent dashboard plus
       a non-interactive command mode designed for AI-agent integration.
       Unaffiliated with Visma.
+    description_fi: >-
+      Itsenäinen, avoimen lähdekoodin CLI, joka lukee Suomen Wilma-koulujärjestelmää
+      — lukujärjestykset, kokeet, arvosanat, poissaolot, viestit ja uutiset —
+      yhtenäisenä JSON-datana eri organisaatioiden välillä. Sisältää interaktiivisen
+      vanhempien dashboardin sekä ei-interaktiivisen komentotilan tekoälyagenttien
+      käyttöön. Ei liity Vismaan.
 
   - id: maiklubi
     name: maiklubi
@@ -83,3 +89,8 @@ entries:
       management — events, RSVPs, invoices, and notifications across multiple
       members and clubs — from the terminal or an AI agent. Every command
       supports --json output and the repo ships a bundled agent skill.
+    description_fi: >-
+      Tekoälyystävällinen CLI myclub.fi:lle, joka kokoaa perheen urheiluseuratoiminnan
+      — tapahtumat, ilmoittautumiset, laskut ja tiedotteet usealta jäseneltä ja
+      seuralta — yhteen paikkaan terminaalista tai tekoälyagentista käsin. Jokainen
+      komento tukee --json-tulostetta, ja repo sisältää valmiin agenttitaidon.

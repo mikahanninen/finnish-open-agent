@@ -36,7 +36,10 @@ Listing is not an endorsement, and we don't vet security — users verify projec
      domains: [transport]         # energy | weather | transport | registers | education | civic | other
      tags: [hsl, tickets]
      description: >-
-       One or two sentences on what it does.
+       One or two sentences on what it does (English).
+     description_fi: >-
+       Sama kahdessa lauseessa suomeksi — the site shows this table in both
+       languages, so a Finnish description is required for community entries.
    ```
 
 2. Regenerate the catalog and the site's community table, and validate:
