@@ -66,3 +66,20 @@ entries:
       consistent JSON across tenants. Ships an interactive parent dashboard plus
       a non-interactive command mode designed for AI-agent integration.
       Unaffiliated with Visma.
+
+  - id: maiklubi
+    name: maiklubi
+    kinds: [skill, library]
+    author: Janne Mäkelä
+    repo: "https://github.com/jannemakela/maiklubi"
+    homepage: "https://maiklubi.com/"
+    license: MIT
+    language: TypeScript
+    domains: [education]
+    tags: [myclub, sports-club, cli, agent-skill, json]
+    added: "2026-07-21"
+    description: >-
+      An AI-friendly CLI for myclub.fi that consolidates family sports-club
+      management — events, RSVPs, invoices, and notifications across multiple
+      members and clubs — from the terminal or an AI agent. Every command
+      supports --json output and the repo ships a bundled agent skill.

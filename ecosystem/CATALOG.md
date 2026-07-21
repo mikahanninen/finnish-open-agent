@@ -4,7 +4,7 @@
 
 A curated, link-only index of skills, MCP servers, and agentic tools for Finnish services. Every project below is owned by its author and used under its own license — we link, we don't copy. To add yours, see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-**3 entries.** Badges: `MCP` · `Skill` · `Agent` · `Library`.
+**4 entries.** Badges: `MCP` · `Skill` · `Agent` · `Library`.
 
 ## ⚡ Energy
 
@@ -27,6 +27,12 @@ Open-source, portable, agent-friendly toolkit exposing Finnish open data as 40 t
 An independent, open-source CLI that reads Finland's Wilma school system — schedules, homework, exams, grades, attendance, messages, and news — as consistent JSON across tenants. Ships an interactive parent dashboard plus a non-interactive command mode designed for AI-agent integration. Unaffiliated with Visma.
 
 **Author:** aikarjal · **License:** MIT · **Lang:** TypeScript · **Site:** https://www.wilm.ai/ · **Tags:** wilma, school, cli, agent-friendly, json
+
+### [maiklubi](https://github.com/jannemakela/maiklubi) `Skill` `Library`
+
+An AI-friendly CLI for myclub.fi that consolidates family sports-club management — events, RSVPs, invoices, and notifications across multiple members and clubs — from the terminal or an AI agent. Every command supports --json output and the repo ships a bundled agent skill.
+
+**Author:** Janne Mäkelä · **License:** MIT · **Lang:** TypeScript · **Site:** https://maiklubi.com/ · **Tags:** myclub, sports-club, cli, agent-skill, json
 
 ---
 
